@@ -1,0 +1,13 @@
+*.img
+*.out
+*/*~
+*/*.o
+*/*.bin
+*.exe
+*.ini
+*.xml
+*.jar
+
+boot/*
+bochs*
+tags

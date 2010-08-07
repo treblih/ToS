@@ -1,0 +1,10 @@
+gcc -c boot.s -gstabs &&
+ld -Tboot.ld boot.o -o boot.elf -e c &&
+objcopy -R .pdr -R .comment -R .note -S -O binary boot.elf boot.bin &&
+
+as loader.s -o loader.elf &&
+objcopy -R .pdr -R .comment -R .note -S -O binary loader.elf loader.bin &&
+dd if=boot.bin of=boot.img bs=512 count=1 conv=notrunc &&
+sudo mount boot.img -o loop /mnt/floppy &&
+sudo cp loader.bin /mnt/floppy &&
+sudo umount /mnt /floppy
