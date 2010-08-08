@@ -49,15 +49,13 @@ start:
 	sti				
 	
 	# clear screen
-	movw	$0x600, %ax
-	movw	$0x700, %bx
-	xor	%cx, %cx
-	movw	$0x184f, %dx
-	int	$0x10
+#	movw	$0x600, %ax
+# 	movw	$0x700, %bx
+# 	xor	%cx, %cx
+# 	movw	$0x184f, %dx
+# 	int	$0x10
 
 	movw    $msg_search_loader, %si
-	call    print
-	movw    $msg_crlf, %si
 	call    print
 
 	# load root secs to 0x7e00
@@ -84,8 +82,6 @@ find_loader:
 
 loader_found:
 	movw	$msg_loader_found, %si
-	call	print
-	movw	$msg_crlf, %si
 	call	print
 
 	subw	$11, %di	# get to the entry start
@@ -115,8 +111,6 @@ cluster_sequence:
 	call    read_secs
 
 	movw	$msg_load_done, %si
-	call	print
-	movw	$msg_crlf, %si
 	call	print
 
 	jmp	$0, $0x500
@@ -225,7 +219,7 @@ next_cluster:
 	addw	$mem_load, %ax	# 0x7c00 + 0x200 + ax
 	movw	%ax, %bx
 	movw	%es:(%bx), %ax	# 2 bytes
-	andw	0xfff0, %ax	# odd, 12-23
+	shrw	$4, %ax		
   .end_next_cluster:
 	popw	%dx
 	popw	%bx
@@ -234,20 +228,30 @@ next_cluster:
 no_loader:
 	movw 	$msg_no_loader, %si
 	call	print
-	jmp	.
-
+	movw	$msg_reboot, %si
+	call	print
+	# int 0x16, func 0, await a input char
+	movb    $0, %ah
+	int     $0x16                             
+	# warm reboot
+	int     $0x19                            
 
 sector: 		.byte 0
 head:   		.byte 0
 cylinder:  		.byte 0
 rootent_loop:		.byte 0		# from 224 to 0
 loader_start_clus:     	.word 0
-msg_crlf:     		.long 0x00000a0d
-loader_name:		.asciz "LOADER  BIN"
-msg_search_loader:  	.asciz "Searching Loader"
-msg_loader_found:	.asciz "Loader Found"
-msg_load_done:		.asciz "Load Done. Ready to Jump"
-msg_no_loader:		.asciz "Loader not found! Panic!"
+
+	# asciz rather than ascii,
+	# we use int 0x13 func 0xe, 
+	# or %al, %al
+loader_name:		.ascii "LOADER  BIN"
+
+msg_search_loader:  	.asciz "\r\nSearching Loader\r\n"
+msg_loader_found:	.asciz "Loader Found\r\n"
+msg_load_done:		.asciz "Load Done\r\n"
+msg_no_loader:		.asciz "Loader not found\r\n"
+msg_reboot:		.asciz "Press Any Key to Reboot\r\n"
 
 .org 	510
 .word	0xaa55

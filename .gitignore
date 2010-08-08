@@ -11,6 +11,7 @@
 *.o
 *.elf
 tmp
+ma
 
 boot/*
 bochs*
