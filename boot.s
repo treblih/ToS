@@ -1,7 +1,8 @@
-.code16	
 .text
+.code16	
 
-.equ	mem_load, 0x7e00 	# 0x7c00 + 0x200
+.equ	mem_root, 0x7e00 # 0x7c00 + 0x200
+.equ	mem_fat, 0x9a00	# 0x7e00 + 14 * 0x200
 .equ	root_secs, 14
 .equ	fat_start, 1
 .equ	root_start, 19	# 1 + 8 * 2
@@ -44,30 +45,31 @@ start:
 	movw    %ax, %ds
 	movw    %ax, %es
 	movw    %ax, %gs
+
+	#----------------------------------------------------------
+	# stack set to 0x9fc00,
+	# can't be 0x9fc0:0, sp != 0
+	# Extend BIOS Data Area - EBDA
+	# 0x9fc00 - 0xa0000
+	#----------------------------------------------------------
+	movw	$0x9000, %ax
 	movw    %ax, %ss
-	movw    $0xffff, %sp
+	movw    $0xfbff, %sp	
 	sti				
-	
-	# clear screen
-#	movw	$0x600, %ax
-# 	movw	$0x700, %bx
-# 	xor	%cx, %cx
-# 	movw	$0x184f, %dx
-# 	int	$0x10
 
 	movw    $msg_search_loader, %si
 	call    print
 
-	# load root secs to 0x7e00
+	# load 14 root secs to 0x7e00
 	movw	$root_start, %ax
 	movw	$root_secs, %cx
-	movw	$mem_load, %bx	
+	movw	$mem_root, %bx	
 	call	read_secs
 
 	# find "LOADER  BIN" in root entries
 	movw 	bpb_RootEntries, %cx
 	movw 	%cx, rootent_loop
-	movw 	$mem_load, %di	# 0x7e00
+	movw 	$mem_root, %di	# 0x7e00
 find_loader:
 	movw 	$11, %cx	# max name 11 bytes
 	movw 	$loader_name, %si
@@ -89,10 +91,10 @@ loader_found:
 	movw	(%di), %cx
 	movw	%cx, loader_start_clus
 
-	# load FATs to 0x7e00
+	# load 8 FATs to 0x9a00
 	movw	$fat_start, %ax
 	movw	$9, %cx
-	movw    $mem_load, %bx                          
+	movw    $mem_fat, %bx                          
 	call    read_secs
 
 	# load loader.bin to 0050:0000
@@ -101,6 +103,7 @@ loader_found:
 cluster_sequence:
 	inc	%dx
 	call	next_cluster
+	andb	$0x0f, %ah	# make sure ax only has 12 bits
 	cmp	$0xff7, %ax
 	jl	cluster_sequence
 
@@ -109,7 +112,6 @@ cluster_sequence:
 	movw	%dx, %cx	# how many
 	movw	$0x500, %bx	# es:bx 0:500
 	call    read_secs
-
 	movw	$msg_load_done, %si
 	call	print
 
@@ -206,20 +208,16 @@ next_cluster:
 	mulw	%bx
 	movw	$2, %bx
 	div	%bx		# least significant bit to CF
-	cmp	$0, %dx		# remainder
-
-	jnz	.odd
-
-	addw	$mem_load, %ax	# 0x7c00 + 0x200 + ax
-	movw	%ax, %bx
-	movw	(%bx), %ax	# 2 bytes
-	andw	0x0fff, %ax	# even, 0-11
-	jmp	.end_next_cluster
-  .odd:
-	addw	$mem_load, %ax	# 0x7c00 + 0x200 + ax
+	addw	$mem_fat, %ax	# 0x7c00 + 0x200 + ax
 	movw	%ax, %bx
 	movw	%es:(%bx), %ax	# 2 bytes
-	shrw	$4, %ax		
+
+	cmp	$0, %dx		# remainder
+	jz	.end_next_cluster
+	shrw	$4, %ax
+#	jmp	.end_next_cluster
+#  .even:
+#	andb	0x0f, %ah	# even, 0-11
   .end_next_cluster:
 	popw	%dx
 	popw	%bx
@@ -250,8 +248,8 @@ loader_name:		.ascii "LOADER  BIN"
 msg_search_loader:  	.asciz "\r\nSearching Loader\r\n"
 msg_loader_found:	.asciz "Loader Found\r\n"
 msg_load_done:		.asciz "Load Done\r\n"
-msg_no_loader:		.asciz "Loader not found\r\n"
+msg_no_loader:		.asciz "Loader Not Found\r\n"
 msg_reboot:		.asciz "Press Any Key to Reboot\r\n"
 
-.org 	510
+.org	510
 .word	0xaa55

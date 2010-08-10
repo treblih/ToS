@@ -13,6 +13,9 @@
 tmp
 ma
 
+a.s
+.vimrc
+
 boot/*
 bochs*
 tags
