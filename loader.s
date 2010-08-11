@@ -23,23 +23,30 @@
 #------------------------------------------------------------------ 
 # jump from boot sector to here
 #------------------------------------------------------------------ 
-	# clear screen
-	movw	$0x600, %ax
- 	movw	$0xa00, %bx
- 	xor	%cx, %cx
- 	movw	$0x184f, %dx
- 	int	$0x10
+	# func 0, al == 2, 80 * 25, 16 colors
+	movw	$0x002, %ax
+	int 	$0x10
 
+	# clear screen
+	# movw	$0x600, %ax	# func 6, al == 0 => clear
+ 	# movb	$7, %bh
+ 	# xor	%cx, %cx
+ 	# movw	$0x1950, %dx
+ 	# int	$0x10
+
+	# set background color, func 0xb
 	movb	$0xb, %ah
-	movb	$1, %bh
+	movw	$0x003, %bx	# bh == 0, background
 	int	$0x10
 
 	# set cursor position, func 2
-	movb	$2, %ah
-	movb	$0, %bh		# page 0
-	movw	$0, %dx		# 0 row 0 column
-	int	$0x10
-	
+	# movb	$2, %ah
+	# movb	$0, %bh		# page 0
+	# movw	$0, %dx		# 0 row 0 column
+	# int	$0x10
+
+	movw	$msg_loader_welcome, %si
+	call	print
 	movw	$msg_search_kernel, %si
 	call	print
 
@@ -87,6 +94,11 @@ cluster_sequence:
 	call    read_secs
 	movw	$msg_load_done, %si
 	call	print
+	movw	$msg_key_to_jmp, %si
+	call	print
+	# int 0x16, func 0, await a input char
+	# movb    $0, %ah
+	# int     $0x16                             
 	# shut down floppy LED
 	call	kill_flp_motor
 
@@ -107,9 +119,16 @@ cluster_sequence:
 
 #------------------------------------------------------------------ 
 # int 0x10, func 0xe
-# arg:	si the string
-# 	al hold the char
+# arg:	bp es:bp string start
+# 	cx string length
+#	dh start row
+#	dl start column
 #------------------------------------------------------------------ 
+	#movb	$0x13, %ah
+	#movb	$0, %bh		# page 0
+	#movb	$1, %al		# write mode
+	#int	$0x10
+	#ret	
 print:
 	lodsb			
 	or	%al, %al	
@@ -119,7 +138,6 @@ print:
 	jmp	print
   .print_end:
 	ret	
-
 #------------------------------------------------------------------ 
 # int 0x13, func 0x2
 # arg:	ax starting sector
@@ -230,6 +248,7 @@ no_kernel:
 	# warm reboot
 	int     $0x19                            
 
+.data
 sector: 		.byte 0
 head:   		.byte 0
 cylinder:  		.byte 0
@@ -239,11 +258,13 @@ bpb_SectorsPerTrack:	.word 18
 
 kernel_name:		.ascii "KERNEL  ELF"
 
-msg_search_kernel:  	.asciz "\r\nSearching Kernel\r\n"
-msg_kernel_found:	.asciz "Kernel Found\r\n"
-msg_load_done:		.asciz "Load Done\r\n"
-msg_no_kernel:		.asciz "Kernel Not Found\r\n"
-msg_reboot:		.asciz "Press Any Key to Reboot\r\n"
+msg_loader_welcome:	.asciz "Welcome to Loader Stage 2\r\n"	# 25
+msg_search_kernel:  	.asciz "Searching Kernel\r\n"		# 16
+msg_kernel_found:	.asciz "Kernel Found, Loading..\r\n"	# 23
+msg_load_done:		.asciz "Load Done\r\n"			# 9
+msg_key_to_jmp:		.asciz "Any Key to Involve into Protect Mode & Kernel\r\n"	# 23
+msg_no_kernel:		.asciz "Kernel Not Found\r\n"		# 16
+msg_reboot:		.asciz "Press Any Key to Reboot\r\n"	# 23
 
 .macro gdt base limit attr
 	.word	\limit & 0xffff
@@ -255,9 +276,9 @@ msg_reboot:		.asciz "Press Any Key to Reboot\r\n"
 
 gdt:
 gdt_dummy:		.quad 0
-__KERNEL_CS: gdt 0, 0xfffff, GDT_X | GDT_32 | GDT_GRANULARITY_4K
+__KERNEL_CS: gdt 0, 0xfffff, GDT_RX | GDT_32 | GDT_GRANULARITY_4K
 __KERNEL_DS: gdt 0, 0xfffff, GDT_RW | GDT_32 | GDT_GRANULARITY_4K
-__KERNEL_VD: gdt 0xb8000, 0xffff, GDT_RW | GDT_DPL3
+# __KERNEL_VD: gdt 0xb8000, 0xffff, GDT_RW | GDT_DPL3
 
 gdtr:			.word gdtr - gdt - 1
 			.long gdt

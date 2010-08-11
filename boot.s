@@ -44,6 +44,7 @@ start:
 	movw	%cx, %ax
 	movw    %ax, %ds
 	movw    %ax, %es
+	movw    %ax, %fs
 	movw    %ax, %gs
 
 	#----------------------------------------------------------

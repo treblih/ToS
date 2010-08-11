@@ -1,0 +1,14 @@
+You need Bochs.
+
+If you just want a glance,
+use --
+	./configure && make && sudo make install
+	to compile & install Bochs,
+or --
+	./configure --enable-debugger --enable-disasm && make && sudo make intall
+	to have a Bochs with debugger,
+or --
+	./configure --enable-gdb-stub && make && sudo make intall
+	to have a Bochs with GDB interface.
+
+(Bochs debugger & gdb-stub are mutually exclusive)
