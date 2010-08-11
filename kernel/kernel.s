@@ -13,28 +13,19 @@ _start:
 	movl	$0x2ffff, %esp
 
 	call	__screen_clear
-	call	__asm_debug
 	call	__puts_tos
 	call	__wait
 	call	__screen_clear
 
-	pushl	$25
-	pushl	$10
 	pushl	$msg_pmode
-	call	puts_dst
+	call	puts
 	addl	$12, %esp
 
-	call	__trans_gdt
-	pushl	$25
-	pushl	$11
-	pushl	$msg_trans_gdt
-	call	puts_dst
-	addl	$12, %esp
-	jmp 	.
-
+	call	__hal_init
+	sti
+	int	$0
 
 # .data			
 # don't add this, otherwise will add a 0x1000 to the label when in mem
 # meanwhile will align them to the next 16-byte edge when in kernel.elf
 msg_pmode:	.asciz "Be in Protect Mode"
-msg_trans_gdt:	.asciz "Transfered GDT to 0xd00"

@@ -1,6 +1,3 @@
-.text
-.code32
-
 .globl	puts
 .globl	puts_dst
 .globl	__puts_tos
@@ -75,7 +72,7 @@ puts_base:
 	or	%al, %al	
 	jz	.puts_base_end
 	stosb
-	movb	$4, (%edi)			# 1 char, 1 property
+	movb	$0x0e, (%edi)			# 1 char, 1 property
 	inc	%edi
 	jmp	.puts_base_loop
   .puts_base_end:
@@ -86,14 +83,12 @@ puts_base:
 
 __puts_tos:
 	pusha
-
 	movl	$14, %ecx	# logo height, 14
 
 	movl	$13, %eax	# always the case
 	pushl	%eax
 	movl	$4, %ebx
-	leal	msg_tos0, %eax
-
+	leal	msg_tos, %eax
   .__puts_tos_loop:
 	pushl	%ebx
 	pushl	%eax
@@ -103,9 +98,7 @@ __puts_tos:
 	inc	%ebx
 	addl	$53, %eax	# 52 + 1
 	loop	.__puts_tos_loop
-
 	addl	$4, %esp	# exclude the column here
-
 	popa
 	ret
 
@@ -113,17 +106,18 @@ __puts_tos:
 cur_pos:	.long 0xb8000
 
 # 52 chars + NULL
-msg_tos0:	.asciz "TTTTTTTTTTTTTTTTTTTTT                SSSSSSSSSSSS   "
-msg_tos1:	.asciz "TTTTTTTTTTTTTTTTTTTTT              SSSSS      SSSSS "
-msg_tos3:	.asciz "       TTTTTT                     SSS            SSS"
-msg_tos4:	.asciz "       TTTTTT          ooooooo    SSS            SSS"
-msg_tos5:	.asciz "       TTTTTT         ooooooooo     SSS             "
-msg_tos6:	.asciz "       TTTTTT        o W       o       SSS          "
-msg_tos7:	.asciz "       TTTTTT        o  E      o           SSS      "
-msg_tos8:	.asciz "       TTTTTT        o   L     o            SSS     "
-msg_tos9:	.asciz "       TTTTTT        o    C    o               SSS  "
-msg_tosa:	.asciz "       TTTTTT        o     O   o                 SSS"
-msg_tosb:	.asciz "       TTTTTT        o      M  o  SSS            SSS"
-msg_tosc:	.asciz "       TTTTTT        o       E o  SSS            SSS"
-msg_tosd:	.asciz "       TTTTTT         ooooooooo    SSSSS     SSSSS  "
-msg_tose:	.asciz "       TTTTTT          ooooooo       SSSSSSSSSSS    "
+msg_tos:
+.asciz "TTTTTTTTTTTTTTTTTTTTT                SSSSSSSSSSSS   "
+.asciz "TTTTTTTTTTTTTTTTTTTTT              SSSSS      SSSSS "
+.asciz "       TTTTTT                     SSS            SSS"
+.asciz "       TTTTTT          ooooooo    SSS            SSS"
+.asciz "       TTTTTT         ooooooooo     SSS             "
+.asciz "       TTTTTT        o W       o       SSS          "
+.asciz "       TTTTTT        o  E      o           SSS      "
+.asciz "       TTTTTT        o   L     o            SSS     "
+.asciz "       TTTTTT        o    C    o               SSS  "
+.asciz "       TTTTTT        o     O   o                 SSS"
+.asciz "       TTTTTT        o      M  o  SSS            SSS"
+.asciz "       TTTTTT        o       E o  SSS            SSS"
+.asciz "       TTTTTT         ooooooooo    SSSSS     SSSSS  "
+.asciz "       TTTTTT          ooooooo       SSSSSSSSSSS    "

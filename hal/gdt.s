@@ -1,8 +1,16 @@
 .include "pmode.h"
 
-.globl	__trans_gdt
+.globl	__x86_gdt_init
 
-__trans_gdt:
+
+__x86_gdt_init:
+	call	trans_gdt
+	pushl	$msg_trans_gdt
+	call	puts
+	addl	$12, %esp
+	ret
+
+trans_gdt:
 	pushl	%eax
 	movw	__gdtr, %ax
 	movzx	%ax, %eax
@@ -32,6 +40,9 @@ flush_sreg:
 	movw	%ax, %gs
 	movw	%ax, %ss
 	ret
+
+
+msg_trans_gdt:	.asciz "Transfered GDT to 0xd00"
 
 __gdt:
 __dummy:	.quad 0

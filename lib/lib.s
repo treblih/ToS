@@ -1,10 +1,9 @@
-.text
-.code32
 .globl	__screen_clear
 .globl	__asm_debug
 .globl	__wait
 .globl	__trans_idt
 .globl	strcpy
+.globl	h2s
 
 __screen_clear:
 	pushl	%eax
@@ -72,5 +71,51 @@ strcpy:
 	popl	%ecx
 	popl	%edi
 	popl	%esi
+	leave
+	ret
+
+#------------------------------------------------------------------ 
+# convert a long hex to string
+#------------------------------------------------------------------ 
+h2s:
+	call	__asm_debug
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%eax
+	pushl	%ebx
+	pushl	%ecx
+	pushl	%edx
+	movl	8(%ebp), %eax
+	xor	%ebx, %ebx
+	xor	%edx, %edx
+	movl	$8, %ecx		# not 4
+	subl	$1, %esp	
+	movb	$0, (%esp)		# nul
+
+  .h2s_loop:
+	movb	%al, %bl
+	shrl	$4, %eax
+	andb	$0x0f, %bl
+	cmp	$0xa, %bl
+	jl	.h2s_not_char
+	subb	$0xa, %bl
+	addb	$0x61, %bl
+	jmp	.h2s_push
+  .h2s_not_char:
+	addb 	$0x30, %bl
+  .h2s_push:
+	subl	$1, %esp	
+	movb	%bl, (%esp)		# nul
+	loop	.h2s_loop
+	subl	$2, %esp	
+	movb	$'x', 1(%esp)		# nul
+	movb	$'0', (%esp)		# nul
+	pushl	%esp
+	call	puts
+	addl	$9, %esp		# 4 + 4 + 1
+	popl	%edx
+	popl	%ecx
+	popl	%ebx
+	popl	%eax
 	leave
 	ret
