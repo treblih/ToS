@@ -1,6 +1,9 @@
+.text
+.code32
+
 .globl	puts
 .globl	puts_dst
-.globl	puts_tos
+.globl	__puts_tos
 
 #------------------------------------------------------------------------------------------------ 
 # void puts(char *str);
@@ -81,17 +84,17 @@ puts_base:
 	leave
 	ret
 
-puts_tos:
+__puts_tos:
 	pusha
 
-	movl	$15, %ecx
+	movl	$14, %ecx	# logo height, 14
 
 	movl	$13, %eax	# always the case
 	pushl	%eax
 	movl	$4, %ebx
 	leal	msg_tos0, %eax
 
-  .puts_tos_loop:
+  .__puts_tos_loop:
 	pushl	%ebx
 	pushl	%eax
 	call	puts_dst
@@ -99,7 +102,7 @@ puts_tos:
 	popl	%ebx
 	inc	%ebx
 	addl	$53, %eax	# 52 + 1
-	loop	.puts_tos_loop
+	loop	.__puts_tos_loop
 
 	addl	$4, %esp	# exclude the column here
 

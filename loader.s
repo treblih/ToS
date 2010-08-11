@@ -1,3 +1,5 @@
+.include "pmode.h"
+
 .text
 .code16
 
@@ -9,16 +11,6 @@
 .equ	root_start, 19	# 1 + 8 * 2
 .equ	data_start, 33	# 19 + 14
 .equ	dir_clus_offset, 0x1a
-
-.equ	GDT_32, 0x4000
-.equ	GDT_GRANULARITY_4K, 0x8000
-.equ	GDT_DPL0, 0
-.equ	GDT_DPL1, 0x20
-.equ	GDT_DPL2, 0x40
-.equ	GDT_DPL3, 0x60
-.equ	GDT_RW, 0x92
-.equ	GDT_X, 0x98
-.equ	GDT_RX, 0x9a
 
 #------------------------------------------------------------------ 
 # jump from boot sector to here
@@ -101,20 +93,7 @@ cluster_sequence:
 	# int     $0x16                             
 	# shut down floppy LED
 	call	kill_flp_motor
-
-	#----------------------------------------------------------
-	# prepare for PMODE
-	#----------------------------------------------------------
-	lgdt	gdtr
-	cli
-	inb	$0x92, %al
-	or	$0b10, %al
-	outb	%al, $0x92
-	movl	%cr0, %eax
-	or	$0b1, %eax
-	movl	%eax, %cr0
-
-	ljmpl	$8, $0x20100
+	jmp	prepare_pmode
 
 
 #------------------------------------------------------------------ 
@@ -248,6 +227,21 @@ no_kernel:
 	# warm reboot
 	int     $0x19                            
 
+#----------------------------------------------------------
+# prepare for PMODE
+#----------------------------------------------------------
+prepare_pmode:
+	lgdt	__gdtr
+	cli
+	inb	$0x92, %al
+	or	$0b10, %al
+	outb	%al, $0x92
+	movl	%cr0, %eax
+	or	$0b1, %eax
+	movl	%eax, %cr0
+	ljmpl	$8, $0x20100
+
+
 .data
 sector: 		.byte 0
 head:   		.byte 0
@@ -266,19 +260,10 @@ msg_key_to_jmp:		.asciz "Any Key to Involve into Protect Mode & Kernel\r\n"	# 23
 msg_no_kernel:		.asciz "Kernel Not Found\r\n"		# 16
 msg_reboot:		.asciz "Press Any Key to Reboot\r\n"	# 23
 
-.macro gdt base limit attr
-	.word	\limit & 0xffff
-	.word	\base & 0xffff
-	.byte 	(\base >> 16) & 0xff
-	.word	((\limit >> 8) & 0x0f00) | (\attr & 0xf0ff)
-	.byte	(\base >> 24) & 0xff
-.endm
+__gdt:
+__dummy:	.quad 0
+__kerneL_cs: gdt 0, 0xfffff, GDT_RX | GDT_32 | GDT_4K
+__kerneL_ds: gdt 0, 0xfffff, GDT_RW | GDT_32 | GDT_4K
 
-gdt:
-gdt_dummy:		.quad 0
-__KERNEL_CS: gdt 0, 0xfffff, GDT_RX | GDT_32 | GDT_GRANULARITY_4K
-__KERNEL_DS: gdt 0, 0xfffff, GDT_RW | GDT_32 | GDT_GRANULARITY_4K
-# __KERNEL_VD: gdt 0xb8000, 0xffff, GDT_RW | GDT_DPL3
-
-gdtr:			.word gdtr - gdt - 1
-			.long gdt
+__gdtr:		.word __gdtr - __gdt - 1
+		.long __gdt
