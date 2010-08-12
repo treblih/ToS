@@ -57,18 +57,33 @@ puts_dst:
 # int puts_base(char *str, int dst_addr);	need 0xb8xxx
 # ret:	edi the new dst_addr
 #
-# print string core func
+# print string core func, if meet with '\n', cr + lf, like Linux
 #------------------------------------------------------------------------------------------------ 
 puts_base:
 	pushl	%ebp
 	movl	%esp, %ebp
 	pushl	%eax
+	pushl	%edx
 	pushl	%esi
 	movl	8(%ebp), %esi
 	movl	12(%ebp), %edi
 	cld
+
   .puts_base_loop:
 	lodsb			
+	cmp	$'\n', %al
+	jne	.puts_putchar
+  	call	__asm_debug
+	movl	%edi,	%eax
+	subl	$0xb8000, %eax
+	movl	$160, %edx	# 80 * 2
+	div	%dl		
+	shrw	$8, %ax		# ah holds the remainder
+	subw	%ax, %di	
+	addl	$160, %edi	# to the next new line
+	jmp	.puts_base_loop
+
+  .puts_putchar:
 	or	%al, %al	
 	jz	.puts_base_end
 	stosb
@@ -77,6 +92,7 @@ puts_base:
 	jmp	.puts_base_loop
   .puts_base_end:
 	popl	%esi
+	popl	%edx
 	popl	%eax
 	leave
 	ret

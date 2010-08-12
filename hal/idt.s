@@ -344,8 +344,8 @@ msg_ex12:	.asciz "#MC Machine Check"
 msg_ex13:	.asciz "#XF SIMD Floating-Point Exception"
 msg_ex14:	.asciz "    Luck Dude Thank to Default Handler"
 
-msg_eip:	.asciz "\r\neip: "
-msg_cs:		.asciz "\r\ncs:"
-msg_eflags:	.asciz "\r\neflags:"
+msg_eip:	.asciz "\neip: "
+msg_cs:		.asciz "\ncs:"
+msg_eflags:	.asciz "\neflags:"
 
 __idtr:		.fill 6
