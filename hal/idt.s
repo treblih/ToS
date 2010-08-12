@@ -152,19 +152,19 @@ exception_handler:
 	addl	$4, %esp
 
 	# print eip / cs / eflags
-	pushl	msg_eip
+	pushl	$msg_eip
 	call	puts
 	addl	$4, %esp
 	pushl	16(%ebp)
 	call	h2s
 	addl	$4, %esp
-	pushl	msg_cs
+	pushl	$msg_cs
 	call	puts
 	addl	$4, %esp
 	pushl	20(%ebp)
 	call	h2s
 	addl	$4, %esp
-	pushl	msg_eflags
+	pushl	$msg_eflags
 	call	puts
 	addl	$4, %esp
 	pushl	24(%ebp)
@@ -217,97 +217,96 @@ __idtr:		.fill 6
 __x86_idt_init:
 	pushl	%eax
 
-
 	# set idt
 	movl	$0x500, %eax
-	pushl	slc_krnl_rx
-	pushl	IDT_IGATE | DPL0
-	pushl	__divide_error
+	pushl	$slc_krnl_rx
+	pushl	$IDT_IGATE | DPL0
+	pushl	$__divide_error
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		# not 16, remains slc & attr
-	pushl	__single_step
+	pushl	$__single_step
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__nmi
+	pushl	$__nmi
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$12, %esp		
-	pushl	IDT_IGATE | DPL3
-	pushl	__breakpoint
+	pushl	$IDT_IGATE | DPL3
+	pushl	$__breakpoint
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__overflow
+	pushl	$__overflow
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$12, %esp		
 	pushl	IDT_IGATE | DPL0
-	pushl	__bounds_check
+	pushl	$__bounds_check
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__inval_opcode
+	pushl	$__inval_opcode
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__copr_not_available
+	pushl	$__copr_not_available
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__double_fault
+	pushl	$__double_fault
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__copr_seg_overrun
+	pushl	$__copr_seg_overrun
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__inval_tss
+	pushl	$__inval_tss
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__segment_not_present
+	pushl	$__segment_not_present
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__stack_seg_fault
+	pushl	$__stack_seg_fault
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__general_protection
+	pushl	$__general_protection
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__page_fault
+	pushl	$__page_fault
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
@@ -315,25 +314,25 @@ __x86_idt_init:
 	# INTEL reserved no.15
 
 	addl	$16, %esp		
-	pushl	__fpu_fault
+	pushl	$__fpu_fault
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__align_fault
+	pushl	$__align_fault
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__machine_abort
+	pushl	$__machine_abort
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
 
 	addl	$8, %esp		
-	pushl	__simd_fault
+	pushl	$__simd_fault
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set

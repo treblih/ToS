@@ -19,11 +19,11 @@ _start:
 
 	pushl	$msg_pmode
 	call	puts
-	addl	$12, %esp
+	addl	$4, %esp
 
 	call	__hal_init
-	sti
-	int	$0
+	call	__asm_debug
+	jmp	.
 
 # .data			
 # don't add this, otherwise will add a 0x1000 to the label when in mem

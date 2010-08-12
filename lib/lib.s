@@ -2,7 +2,7 @@
 .globl	__asm_debug
 .globl	__wait
 .globl	__trans_idt
-.globl	strcpy
+.globl	memcpy
 .globl	h2s
 
 __screen_clear:
@@ -53,18 +53,18 @@ __wait:
 
 #------------------------------------------------------------------ 
 # like the one in stdlib.h
-# arg:	esi source
-#	edi destination
+# arg:	edi destination
+# 	esi source
 #	ecx how many
 #------------------------------------------------------------------ 
-strcpy:
+memcpy:
 	pushl 	%ebp
 	movl	%esp, %ebp
 	pushl 	%esi
 	pushl 	%edi
 	pushl 	%ecx
-	movl	8(%ebp), %esi
-	movl	12(%ebp), %edi
+	movl	8(%ebp), %edi
+	movl	12(%ebp), %esi
 	movl	16(%ebp), %ecx
 	cld
 	rep	movsb
@@ -78,7 +78,6 @@ strcpy:
 # convert a long hex to string
 #------------------------------------------------------------------ 
 h2s:
-	call	__asm_debug
 	pushl	%ebp
 	movl	%esp, %ebp
 	pushl	%eax

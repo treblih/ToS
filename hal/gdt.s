@@ -7,17 +7,19 @@ __x86_gdt_init:
 	call	trans_gdt
 	pushl	$msg_trans_gdt
 	call	puts
-	addl	$12, %esp
+	addl	$4, %esp
 	ret
 
 trans_gdt:
 	pushl	%eax
+	xor	%eax, %eax
 	movw	__gdtr, %ax
+	inc	%ax		# essential last byte
 	movzx	%ax, %eax
 	pushl	%eax		# how many
-	pushl	$gdt_dst
 	pushl	$__gdt
-	call	strcpy
+	pushl	$gdt_dst
+	call	memcpy
 	addl	$12, %esp
 
 	# update __gdtr
