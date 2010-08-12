@@ -24,6 +24,146 @@
 .globl	__simd_fault
 
 
+#-----------------------------------------------------------------------------
+#  should have follow the sequence
+#  INTEL occupied 0x08 - 0x0f, in real mode they're reserved for IRQ
+#
+#  cpu generated exceptions(trap/fault/abort):
+#  err_code - eip - cs - eflags
+#-----------------------------------------------------------------------------
+__x86_idt_init:
+	pushl	%eax
+
+	# set idt
+	movl	$0x500, %eax
+	pushl	$slc_krnl_rx
+	pushl	$IDT_IGATE | DPL0
+	pushl	$__divide_error
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		# not 16, remains slc & attr
+	pushl	$__single_step
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__nmi
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$12, %esp		
+	pushl	$IDT_IGATE | DPL3
+	pushl	$__breakpoint
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__overflow
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$12, %esp		
+	pushl	IDT_IGATE | DPL0
+	pushl	$__bounds_check
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__inval_opcode
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__copr_not_available
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__double_fault
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__copr_seg_overrun
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__inval_tss
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__segment_not_present
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__stack_seg_fault
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__general_protection
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__page_fault
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	# INTEL reserved no.15
+
+	addl	$16, %esp		
+	pushl	$__fpu_fault
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__align_fault
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__machine_abort
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$8, %esp		
+	pushl	$__simd_fault
+	addl	$8, %eax
+	pushl	%eax
+	call	__idt_set
+
+	addl	$16, %esp
+	# set idtr
+	movw	$0x7ff, __idtr
+	movl	$0x500,	__idtr + 2
+
+	lidt	__idtr
+
+	popl	%eax
+	ret
+
 #------------------------------------------------------------------ 
 # void __idt_set(void *dst, void *offset, int attr, int slc)
 #------------------------------------------------------------------ 
@@ -177,7 +317,10 @@ exception_handler:
 	ret
 	
 
-msg_ex_str:	.long msg_ex00
+msg_ex_str:
+.long msg_ex00, msg_ex01, msg_ex02, msg_ex03, msg_ex04
+.long msg_ex05, msg_ex06, msg_ex07, msg_ex08, msg_ex09
+.long msg_ex0a, msg_ex0b, msg_ex0c, msg_ex0d, msg_ex0e
 
 msg_ex00:	.asciz "#DE Divide Error"
 msg_ex01:	.asciz "#DB RESERVED"
@@ -205,143 +348,4 @@ msg_eip:	.asciz "\r\neip: "
 msg_cs:		.asciz "\r\ncs:"
 msg_eflags:	.asciz "\r\neflags:"
 
-#-----------------------------------------------------------------------------
-#  should have follow the sequence
-#  INTEL occupied 0x08 - 0x0f, in real mode they're reserved for IRQ
-#
-#  cpu generated exceptions(trap/fault/abort):
-#  err_code - eip - cs - eflags
-#-----------------------------------------------------------------------------
 __idtr:		.fill 6
-
-__x86_idt_init:
-	pushl	%eax
-
-	# set idt
-	movl	$0x500, %eax
-	pushl	$slc_krnl_rx
-	pushl	$IDT_IGATE | DPL0
-	pushl	$__divide_error
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		# not 16, remains slc & attr
-	pushl	$__single_step
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__nmi
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$12, %esp		
-	pushl	$IDT_IGATE | DPL3
-	pushl	$__breakpoint
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__overflow
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$12, %esp		
-	pushl	IDT_IGATE | DPL0
-	pushl	$__bounds_check
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__inval_opcode
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__copr_not_available
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__double_fault
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__copr_seg_overrun
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__inval_tss
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__segment_not_present
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__stack_seg_fault
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__general_protection
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__page_fault
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	# INTEL reserved no.15
-
-	addl	$16, %esp		
-	pushl	$__fpu_fault
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__align_fault
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__machine_abort
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	addl	$8, %esp		
-	pushl	$__simd_fault
-	addl	$8, %eax
-	pushl	%eax
-	call	__idt_set
-
-	# set idtr
-	movw	$0x7ff, __idtr
-	movl	$0x500,	__idtr + 2
-
-	lidt	__idtr
-
-	popl	%eax
-	ret

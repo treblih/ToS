@@ -22,7 +22,8 @@ _start:
 	addl	$4, %esp
 
 	call	__hal_init
-	call	__asm_debug
+	sti
+	int	$1
 	jmp	.
 
 # .data			
