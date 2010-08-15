@@ -35,129 +35,129 @@ __x86_idt_init:
 	pushl	%eax
 
 	# set idt
-	movl	$0x500, %eax
+	movl	$0, %eax		# vector starts from 0
 	pushl	$slc_krnl_rx
 	pushl	$IDT_IGATE | DPL0
 	pushl	$__divide_error
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		# not 16, remains slc & attr
+
 	pushl	$__single_step
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__nmi
 	addl	$8, %eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$12, %esp		
+
 	pushl	$IDT_IGATE | DPL3
 	pushl	$__breakpoint
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+	
 	pushl	$__overflow
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$12, %esp		
+
 	pushl	IDT_IGATE | DPL0
 	pushl	$__bounds_check
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__inval_opcode
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__copr_not_available
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__double_fault
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__copr_seg_overrun
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__inval_tss
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__segment_not_present
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__stack_seg_fault
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__general_protection
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__page_fault
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
+	addl	$16, %esp		
 
 	# INTEL reserved no.15
 
-	addl	$16, %esp		
 	pushl	$__fpu_fault
-	addl	$8, %eax
+	addl	$2, %eax	# add 2, not inc
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__align_fault
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__machine_abort
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$8, %esp		
+
 	pushl	$__simd_fault
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
-
 	addl	$16, %esp
+
 	# set idtr
 	movw	$0x7ff, __idtr
-	movl	$0x500,	__idtr + 2
+	movl	$idt_dst, __idtr + 2
 
 	lidt	__idtr
 
@@ -174,7 +174,12 @@ __idt_set:
 	pushl	%ebx
 	pushl	%edi
 
-	movl	8(%ebp), %edi
+	movl	8(%ebp), %eax		# vector
+	movw	$8, %bx
+	mulw	%bx
+	movl	%eax, %edi
+	addl	$idt_dst, %edi
+
 	movl	12(%ebp), %ebx		# offset
 	movw	%bx, (%edi)
 	addl	$2, %edi
@@ -262,10 +267,6 @@ __machine_abort:
 __simd_fault:
 	pushl	$0xffffffff
 	pushl	$0x13
-	jmp	exception
-__ignore:
-	pushl	$0xffffffff
-	pushl	$0x14
 	jmp	exception
 
 exception:

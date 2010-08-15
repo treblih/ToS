@@ -22,7 +22,7 @@ _start:
 	addl	$4, %esp
 
 	call	__hal_init
-	sti
+	# sti
 	int	$1
 	jmp	.
 
