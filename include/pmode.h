@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  pmode.h
- *
- *    Description:  
- *
- *        Created:  11.08.10 19:26
- *       Revision:  none
- *       Compiler:  GCC 4.4
- *
- *         Author:  Yang Zhang, treblih.divad@gmail.com
- *        Company:  
- *
- * =====================================================================================
- */
-
 .equ	GDT_32, 0x4000
 .equ	GDT_4K, 0x8000
 .equ	GDT_RW, 0x92

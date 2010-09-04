@@ -10,6 +10,7 @@
 *.bin
 *.o
 *.elf
+*.txt
 tmp
 ma
 
