@@ -1,32 +1,26 @@
 .text
 .code32
 
-.globl	_start
+.globl	__kernel
 
-
-_start:
-	movl	$0x10, %eax
-	movw	%ax, %ds
-	movw	%ax, %es
-	movw	%ax, %gs
-	movw	%ax, %ss
-	movl	$0x2ffff, %esp
-
-	call	__screen_clear
-	call	__puts_tos
-	call	__wait
-	call	__screen_clear
-
-	pushl	$msg_pmode
+__kernel:
+	call	__hal_init
+	/* sti */
+#int	$1
+#movl	$10, %ecx
+	/* call	__wait */
+	/* mov	$0xfffff, %ecx */
+ ppp:
+ 	/* nop */
+	/* loop	ppp */
+ 	pushl	$msg_wa
 	call	puts
 	addl	$4, %esp
-
-	call	__hal_init
-	# sti
-	int	$1
+	
 	jmp	.
+	call	__get_pit_cnt
+	pushl	%eax
+	call	h2s
+	addl	$4, %esp
 
-# .data			
-# don't add this, otherwise will add a 0x1000 to the label when in mem
-# meanwhile will align them to the next 16-byte edge when in kernel.elf
-msg_pmode:	.asciz "Be in Protect Mode\n"
+msg_wa:	.asciz "wakakak\n"

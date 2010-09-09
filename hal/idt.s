@@ -50,7 +50,7 @@ __x86_idt_init:
 	addl	$8, %esp		
 
 	pushl	$__nmi
-	addl	$8, %eax
+	inc	%eax
 	pushl	%eax
 	call	__idt_set
 	addl	$12, %esp		
@@ -68,7 +68,7 @@ __x86_idt_init:
 	call	__idt_set
 	addl	$12, %esp		
 
-	pushl	IDT_IGATE | DPL0
+	pushl	$IDT_IGATE | DPL0
 	pushl	$__bounds_check
 	inc	%eax
 	pushl	%eax
@@ -127,7 +127,7 @@ __x86_idt_init:
 	inc	%eax
 	pushl	%eax
 	call	__idt_set
-	addl	$16, %esp		
+	addl	$8, %esp		
 
 	# INTEL reserved no.15
 
@@ -165,7 +165,7 @@ __x86_idt_init:
 	ret
 
 #------------------------------------------------------------------ 
-# void __idt_set(void *dst, void *offset, int attr, int slc)
+# void __idt_set(int vector, void *offset, int attr, int slc)
 #------------------------------------------------------------------ 
 __idt_set:
 	pushl	%ebp
@@ -178,7 +178,7 @@ __idt_set:
 	movw	$8, %bx
 	mulw	%bx
 	movl	%eax, %edi
-	addl	$idt_dst, %edi
+	addl	$idt_dst, %edi		# 0x500 + n * 8
 
 	movl	12(%ebp), %ebx		# offset
 	movw	%bx, (%edi)
@@ -259,7 +259,7 @@ __fpu_fault:                     # yes, it's right. 'cause INTEL has reserved 0x
 	pushl	$0x10		# vec_no	= 0x10
 	jmp	exception
 __align_fault:
-	pushl	$0x11		# vec_no	= 9
+	pushl	$0x11		# vec_no	= 0x11
 	jmp	exception
 __machine_abort:
 	pushl	$0x12
@@ -322,6 +322,7 @@ msg_ex_str:
 .long msg_ex00, msg_ex01, msg_ex02, msg_ex03, msg_ex04
 .long msg_ex05, msg_ex06, msg_ex07, msg_ex08, msg_ex09
 .long msg_ex0a, msg_ex0b, msg_ex0c, msg_ex0d, msg_ex0e
+.long msg_ex0f, msg_ex10, msg_ex11, msg_ex12, msg_ex13
 
 msg_ex00:	.asciz "#DE Divide Error"
 msg_ex01:	.asciz "#DB RESERVED"

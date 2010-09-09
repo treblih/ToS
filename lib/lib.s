@@ -40,6 +40,7 @@ __asm_debug:
 
 __wait:
 	pushl	%ecx
+
 	movl	$0xfff, %ecx
   .__wait_loop1:
   	pushl	%ecx
@@ -48,6 +49,7 @@ __wait:
     	loop	.__wait_loop2
 	popl	%ecx
   	loop 	.__wait_loop1
+
 	popl	%ecx
 	ret
 

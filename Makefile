@@ -10,17 +10,18 @@ FLOPPY	:=	/media/floppy
 
 .PHONY	:	all cascading install clean
 
-all	:	cascading $(KRNL) install
+all	:	clean cascading $(KRNL) install
 
 # essential ';'	-- 
 # make -C boot/; make -C kernel/; make -C hal/; make -C lib/
 # dir spans within the foreach
 cascading:
-	$(foreach dir, $(DIRS), $(MAKE) -C $(dir);)
+	@$(foreach dir, $(DIRS), $(MAKE) -C $(dir);)
 
 # after cascading, *.o appear in respective dir
 # kernel.o must be the 1st to link into kernel.elf
-$(KRNL)	:	OBJS = $(wildcard  kernel/*.o) $(wildcard  lib/*.o) $(wildcard hal/*.o)
+$(KRNL)	:	OBJS = $(wildcard  kernel/stage3.o kernel/kernel.o lib/*.o hal/*.o)
+#$(KRNL)	:	OBJS = $(wildcard  kernel/*.o lib/*.o hal/*.o)
 $(KRNL)	:
 	$(LD) $(LDFLAGS) 0x20100 $(OBJS) -o $(@)
 install	:

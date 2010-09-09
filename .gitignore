@@ -13,6 +13,7 @@
 *.txt
 tmp
 ma
+core*
 
 a.s
 .vimrc

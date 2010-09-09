@@ -44,7 +44,7 @@ flush_sreg:
 	ret
 
 
-msg_trans_gdt:	.asciz "Transfered GDT to 0xd00"
+msg_trans_gdt:	.asciz "transfered gdt to 0xd00\n"	# following IDT
 
 __gdt:
 __dummy:	.quad 0

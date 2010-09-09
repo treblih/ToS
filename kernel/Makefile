@@ -1,5 +1,5 @@
 ASFLAGS	+=	-I../include/ -gstabs+
-OBJS	:=	kernel.o
+OBJS	:=	stage3.o kernel.o
 
 .PHONY	:	all clean
 
