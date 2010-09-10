@@ -1,3 +1,4 @@
+CFLAGS	:=	-I../include/ -gstabs+ -fno-builtin -std=gnu99
 LDFLAGS	:=	-Ttext
 MAKE	:= 	make
 export

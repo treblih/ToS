@@ -4,11 +4,10 @@
 .globl	_start
 
 _start:
+	pushl	%ebp
+	movl	%esp, %ebp
+
 	# flush sregs
-#pushl	%ebp
-#movl	%esp, %ebp
-#	movl	8(%ebp), 
-	# long jump, 0x66
 	movl	$0x10, %eax
 	movw	%ax, %ds
 	movw	%ax, %es
@@ -25,7 +24,14 @@ _start:
 	call	puts
 	addl	$4, %esp
 
-	jmp	__kernel
+	# ljmpl not call, so 4/8 not 8/12
+	pushl	8(%ebp)
+	pushl	4(%ebp)
+	call	__kernel
+	addl	$8, %esp
+	cli
+	hlt
+
 # .data			
 # don't add this, otherwise will add a 0x1000 to the label when in mem
 # meanwhile will align them to the next 16-byte edge when in kernel.elf

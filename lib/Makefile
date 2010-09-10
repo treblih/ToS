@@ -1,10 +1,7 @@
-CFLAGS	+=	-I../include/ -gstabs+ -fno-builtin -c
-OBJS	:=	lib.o puts.o
+OBJS	:=	libs.o libc.o puts.o printf.o
 
 .PHONY	:	all clean
 
 all	:	$(OBJS)
-$(OBJS) :	%.o	:%.s
-	$(CC) $(CFLAGS) $< -o $@
 clean	:
 	-rm *.o

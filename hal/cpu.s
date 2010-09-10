@@ -11,6 +11,9 @@ __x86_cpu_init:
 
 
 get_cpu_vendor:
+	pushl	$msg_cpuid
+	call	puts
+	addl	$4, %esp
 	movl	$0, %eax
 	cpuid
 	movl	%ebx, msg_cpu_vendor
@@ -24,3 +27,4 @@ get_cpu_vendor:
 	ret
 
 msg_cpu_vendor:	.fill 14	# 12 + \n + nul
+msg_cpuid:	.asciz "your cpu id: "

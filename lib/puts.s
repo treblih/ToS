@@ -55,7 +55,7 @@ puts_dst:
 
 #------------------------------------------------------------------------------------------------ 
 # int puts_base(char *str, int dst_addr);	need 0xb8xxx
-# ret:	edi the new dst_addr
+# ret:	edi	the new dst_addr
 #
 # print string core func, if meet with '\n', cr + lf, like Linux
 #------------------------------------------------------------------------------------------------ 

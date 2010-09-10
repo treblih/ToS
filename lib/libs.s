@@ -4,6 +4,7 @@
 .globl	__trans_idt
 .globl	memcpy
 .globl	h2s
+.globl	strlen
 
 __screen_clear:
 	pushl	%eax
@@ -119,4 +120,25 @@ h2s:
 	popl	%ebx
 	popl	%eax
 	leave
+	ret
+
+#------------------------------------------------------------------ 
+# int strlen(const char *);
+#------------------------------------------------------------------ 
+strlen:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %edi
+	movw 	$0xffff, %cx
+	movl 	$0, %eax		# compare with '\0'
+	cld
+	repne 	scasb
+	jne 	.strlen_end		# %eax holds 0
+	subw 	$0xffff, %cx
+	neg 	%cx
+	dec 	%cx
+	movzx	%cx, %ecx
+	movl	%ecx, %eax
+  .strlen_end:
+  	leave
 	ret
