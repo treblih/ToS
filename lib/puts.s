@@ -1,6 +1,11 @@
+.include "mem.h"
+
+
 .globl	puts
 .globl	puts_dst
 .globl	__puts_tos
+.globl	__print_mem_size
+.globl	__print_mem_map
 
 #------------------------------------------------------------------------------------------------ 
 # void puts(char *str);
@@ -118,8 +123,77 @@ __puts_tos:
 	popa
 	ret
 
+__print_mem_size:
+	# (low + 1024 + high * 64) / 1024
+	movl	$BOOT_INFO_ADDR, %edi
+	movl	MEM_LOW(%edi), %eax
+	addl	$1024, %eax
+	movl	MEM_HIGH(%edi), %ebx
+	shll	$6, %ebx
+	addl	%ebx, %eax
+	shrl	$10, %eax
+
+	pushl	%eax
+	pushl	$msg_mem_size
+	call	printf
+	addl	$8, %esp
+	ret
+
+__print_mem_map:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$8, %esp
+	movl	$0, -4(%ebp)		# int i = 0;
+
+	movl	$MEM_MAP_ENTRY_ADDR, %edi
+  .__print_mem_map_loop:
+	cmp	$0, -4(%ebp)
+	jle	.__print_mem_map_item
+	cmp	$0, START_LOW(%edi)
+	jne	.__print_mem_map_item
+	jmp	.__print_mem_map_end
+  .__print_mem_map_item:
+  	movl	TYPE(%edi), %eax
+	cmp	$4, %eax		# if (type > 4) type = 2;
+	jle	.__print_mem_map_print
+	movl	$2, %eax
+  .__print_mem_map_print:
+  	decl	%eax			# 0 - 3
+	pushl	msg_mem_type_str(, %eax, 4)
+	incl	%eax			# 1 - 4
+  	pushl	%eax
+	pushl	SIZE_LOW(%edi)
+	pushl	SIZE_HIGH(%edi)
+	pushl	START_LOW(%edi)
+	pushl	START_HIGH(%edi)
+	pushl	-4(%ebp)
+	pushl	$msg_mem_map
+	call	printf
+	addl	$32, %esp
+	
+  	incl	-4(%ebp)
+	addl	$MM_ENTRY_SIZE, %edi
+  	jmp	.__print_mem_map_loop
+
+  .__print_mem_map_end:
+	addl	$8, %esp
+	leave
+	ret
+
 
 cur_pos:	.long 0xb8000
+msg_mem_size:	.asciz "your computer has %d mb physical memory\n"
+msg_mem_map:	.asciz "area: %d, start: 0x%x%x, length: 0x%x%x, type: %d(%s)\n"
+
+# no ',' follows the last 1 in every line, otherwise as regrads it as a NULL pointer
+msg_mem_type_str:
+.long	msg_mem_map_type1, msg_mem_map_type2
+.long	msg_mem_map_type3, msg_mem_map_type4
+
+msg_mem_map_type1:	.asciz "available"
+msg_mem_map_type2:	.asciz "reserved"
+msg_mem_map_type3:	.asciz "acpi reclaim"
+msg_mem_map_type4:	.asciz "acpi nvs memory"
 
 # 52 chars + NULL
 msg_tos:

@@ -4,9 +4,6 @@
 .globl	_start
 
 _start:
-	pushl	%ebp
-	movl	%esp, %ebp
-
 	# flush sregs
 	movl	$0x10, %eax
 	movw	%ax, %ds
@@ -24,15 +21,13 @@ _start:
 	call	puts
 	addl	$4, %esp
 
-	# ljmpl not call, so 4/8 not 8/12
-	pushl	8(%ebp)
-	pushl	4(%ebp)
 	call	__kernel
-	addl	$8, %esp
 	cli
 	hlt
 
 # .data			
 # don't add this, otherwise will add a 0x1000 to the label when in mem
 # meanwhile will align them to the next 16-byte edge when in kernel.elf
+mem_map_addr:	.long 0
+boot_info_addr:	.long 0
 msg_pmode:	.asciz "now in protect mode\n"

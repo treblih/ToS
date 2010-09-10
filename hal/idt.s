@@ -318,6 +318,7 @@ exception_handler:
 	ret
 	
 
+# no ',' follows the last 1 in every line, otherwise as regrads it as a NULL pointer
 msg_ex_str:
 .long msg_ex00, msg_ex01, msg_ex02, msg_ex03, msg_ex04
 .long msg_ex05, msg_ex06, msg_ex07, msg_ex08, msg_ex09
