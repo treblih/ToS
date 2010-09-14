@@ -2,9 +2,10 @@
 .globl	__asm_debug
 .globl	__wait
 .globl	__trans_idt
-.globl	memcpy
 .globl	h2s
 .globl	strlen
+.globl	memset
+.globl	memcpy
 
 __screen_clear:
 	pushl	%eax
@@ -52,29 +53,6 @@ __wait:
   	loop 	.__wait_loop1
 
 	popl	%ecx
-	ret
-
-#------------------------------------------------------------------ 
-# like the one in stdlib.h
-# arg:	edi destination
-# 	esi source
-#	ecx how many
-#------------------------------------------------------------------ 
-memcpy:
-	pushl 	%ebp
-	movl	%esp, %ebp
-	pushl 	%esi
-	pushl 	%edi
-	pushl 	%ecx
-	movl	8(%ebp), %edi
-	movl	12(%ebp), %esi
-	movl	16(%ebp), %ecx
-	cld
-	rep	movsb
-	popl	%ecx
-	popl	%edi
-	popl	%esi
-	leave
 	ret
 
 #------------------------------------------------------------------ 
@@ -141,4 +119,51 @@ strlen:
 	movl	%ecx, %eax
   .strlen_end:
   	leave
+	ret
+
+#------------------------------------------------------------------ 
+# void *memset(void *s, int c, size_t n);
+#------------------------------------------------------------------ 
+memset:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%eax
+	pushl	%ecx
+	pushl	%edi
+
+	movl	8(%ebp), %edi
+	movl	12(%ebp), %eax
+	movl	16(%ebp), %ecx
+	cld
+	rep	stosb
+
+	popl	%edi
+	popl	%ecx
+	popl	%eax
+	leave
+	ret
+
+#------------------------------------------------------------------ 
+# void *memcpy(void *dest, const void *src, size_t n);
+# arg:	edi destination
+# 	esi source
+#	ecx how many
+#------------------------------------------------------------------ 
+memcpy:
+	pushl 	%ebp
+	movl	%esp, %ebp
+	pushl 	%esi
+	pushl 	%edi
+	pushl 	%ecx
+
+	movl	8(%ebp), %edi
+	movl	12(%ebp), %esi
+	movl	16(%ebp), %ecx
+	cld
+	rep	movsb
+
+	popl	%ecx
+	popl	%edi
+	popl	%esi
+	leave
 	ret

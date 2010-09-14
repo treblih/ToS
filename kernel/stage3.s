@@ -28,6 +28,4 @@ _start:
 # .data			
 # don't add this, otherwise will add a 0x1000 to the label when in mem
 # meanwhile will align them to the next 16-byte edge when in kernel.elf
-mem_map_addr:	.long 0
-boot_info_addr:	.long 0
 msg_pmode:	.asciz "now in protect mode\n"

@@ -21,7 +21,7 @@ cascading:
 
 # after cascading, *.o appear in respective dir
 # kernel.o must be the 1st to link into kernel.elf
-$(KRNL)	:	OBJS = $(wildcard  kernel/stage3.o kernel/kernel.o lib/*.o hal/*.o)
+$(KRNL)	:	OBJS = $(wildcard  kernel/stage3.o kernel/kernel.o kernel/pmem.o lib/*.o hal/*.o)
 #$(KRNL)	:	OBJS = $(wildcard  kernel/*.o lib/*.o hal/*.o)
 $(KRNL)	:
 	$(LD) $(LDFLAGS) 0x20100 $(OBJS) -o $(@)

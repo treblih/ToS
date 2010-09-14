@@ -1,3 +1,5 @@
+.include "mem.h"
+
 .text
 .code32
 
@@ -8,8 +10,8 @@
 #------------------------------------------------------------------ 
 __kernel:
 	call	__hal_init
-	call	__print_mem_size
-	call	__print_mem_map
+	call	__pmem_init
+	call	__print_pmem_map
 	
 	jmp	.
 	/* sti */

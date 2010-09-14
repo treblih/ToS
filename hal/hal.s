@@ -10,4 +10,4 @@ __hal_init:
 	call	__pit_init
 	ret
 
-msg_hal:	.asciz "initing hal...\n"
+msg_hal:	.asciz "initializing hal...\n"
