@@ -14,5 +14,3 @@
 # offset of elements in struct boot_info
 .equ	MEM_LOW,	4
 .equ	MEM_HIGH,	8
-
-.equ	PMEM_BITVEC_ADDR,	0x30000

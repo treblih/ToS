@@ -5,9 +5,17 @@
 
 .globl	__pmem_init
 .globl	__get_pmem_size
-.globl	__print_pmem_map
+.globl	__get_pmem_bitvec_addr
 
+#------------------------------------------------------------------ 
+# unsigned __pmem_init();
+# get bit vectors for physical memory by kmalloc_align
+# then init the bit vectors
+#------------------------------------------------------------------ 
 __pmem_init:
+	pushl	%ebp
+	movl	%esp, %ebp
+
 	pushl	$msg_pmem_init
 	call	puts
 	addl	$4, %esp
@@ -16,12 +24,21 @@ __pmem_init:
 	call	print_pmem_size
 	shrl	$2, %eax		# xk / 4k, blocks wanted
 	movl	%eax, PMEM_BLOCK_MAX
-	shrl	$5, %eax		# / 32,    bytes wanted
+
+	# bitvec_create(int);
+	pushl	$1
+	call	bitvec_create
+	addl	$4, %esp
+
+	# bitvec_init(bitvec_t *, int);
+	pushl	PMEM_BLOCK_MAX
 	pushl	%eax
-	pushl	$0
-	pushl	$PMEM_BITVEC_ADDR
-	call	memset
-	add	$12, %esp
+	call	bitvec_init
+	addl	$8, %esp
+
+	call	print_pmem_map
+
+	leave
 	ret
 
 #------------------------------------------------------------------ 
@@ -51,43 +68,45 @@ __get_pmem_size:
 	ret
 
 print_pmem_size:
+	pushl	%eax
   	movl	PMEM_SIZE, %eax
 	shrl	$10, %eax		# kb / 1024 = mb
 	pushl	%eax
 	pushl	$msg_pmem_size
 	call	printf
 	addl	$8, %esp
+	popl	%eax
 	ret
 
 #------------------------------------------------------------------ 
-# void __print_pmem_map(void *callback);
+# void print_pmem_map(void *callback);
 #------------------------------------------------------------------ 
-__print_pmem_map:
+print_pmem_map:
 	pushl	%ebp
 	movl	%esp, %ebp
 	subl	$8, %esp
 	movl	$0, -4(%ebp)		# int i = 0;
 
 	movl	$MEM_MAP_ENTRY_ADDR, %edi
-  .__print_pmem_map_loop:
+  .print_pmem_map_loop:
 	cmp	$0, -4(%ebp)
-	jle	.__print_pmem_map_item
+	jle	.print_pmem_map_item
 	cmp	$0, START_LOW(%edi)
-	jne	.__print_pmem_map_item
-	jmp	.__print_pmem_map_end
-  .__print_pmem_map_item:
+	jne	.print_pmem_map_item
+	jmp	.print_pmem_map_end
+  .print_pmem_map_item:
   	movl	TYPE(%edi), %eax
 	cmp	$4, %eax		# if (type > 4) type = 2;
-	jle	.__print_pmem_map_process
+	jle	.print_pmem_map_process
 	movl	$2, %eax
-  .__print_pmem_map_process:
+  .print_pmem_map_process:
   	decl	%eax			# 0 - 3
 	pushl	msg_pmem_type_str(, %eax, 4)
 	incl	%eax			# 1 - 4
 	cmp	$1, %eax
-	jne	.__print_pmem_map_print
+	jne	.print_pmem_map_print
 	/* call	8(%ebp) */
-  .__print_pmem_map_print:
+  .print_pmem_map_print:
   	pushl	%eax
 	movl	SIZE_HIGH(%edi), %eax
 	shll	$16, %eax
@@ -104,18 +123,18 @@ __print_pmem_map:
 	
   	incl	-4(%ebp)
 	addl	$MM_ENTRY_SIZE, %edi
-  	jmp	.__print_pmem_map_loop
+  	jmp	.print_pmem_map_loop
 
-  .__print_pmem_map_end:
+  .print_pmem_map_end:
 	addl	$8, %esp
 	leave
 	ret
 
 
-PMEM_SIZE:	.long	0
-PMEM_BLOCK_MAX:	.long	0
-PMEM_BLOCK_USED:.long	0
-PMEM_BITVEC:	.long	0
+PMEM_SIZE:		.long	0
+PMEM_BLOCK_MAX:		.long	0
+PMEM_BLOCK_USED:	.long	0
+PMEM_BITVEC_ADDR:	.long	0
 
 # no ',' follows the last 1 in every line, otherwise as regrads it as a NULL pointer
 msg_pmem_type_str:

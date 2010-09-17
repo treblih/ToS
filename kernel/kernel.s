@@ -11,7 +11,8 @@
 __kernel:
 	call	__hal_init
 	call	__pmem_init
-	call	__print_pmem_map
+	/* call	__print_pmem_map */
+	/* call	__page_init */
 	
 	jmp	.
 	/* sti */
