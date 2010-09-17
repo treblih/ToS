@@ -1,5 +1,8 @@
 .include "mem.h"
 
+.equ	BIT_SET,	1
+.equ	BIT_PMEM,	1
+
 .text
 .code32
 
@@ -25,10 +28,16 @@ __pmem_init:
 	shrl	$2, %eax		# xk / 4k, blocks wanted
 	movl	%eax, PMEM_BLOCK_MAX
 
+	# __set_heap_addr(unsigned char *);
+	pushl	$0x200000
+	call	__set_heap_addr
+	addl	$4, %esp
+
 	# bitvec_create(int);
-	pushl	$1
+	pushl	$BIT_PMEM
 	call	bitvec_create
 	addl	$4, %esp
+	movl	%eax, PMEM_BITVEC_ADDR
 
 	# bitvec_init(bitvec_t *, int);
 	pushl	PMEM_BLOCK_MAX
@@ -105,7 +114,21 @@ print_pmem_map:
 	incl	%eax			# 1 - 4
 	cmp	$1, %eax
 	je	.print_pmem_map_print
-	/* call	8(%ebp) */
+
+	# bitvec_ctrl(bitvec_t *, ssize_t, ssize_t, int);
+	pushl	$BIT_SET
+	movl	SIZE_HIGH(%edi), %eax
+	shll	$16, %eax
+	movl	SIZE_LOW(%edi), %eax
+	pushl	%eax
+	movl	START_HIGH(%edi), %eax
+	shll	$16, %eax
+	movl	START_LOW(%edi), %eax
+	pushl	%eax
+	pushl	PMEM_BITVEC_ADDR
+	call	bitvec_ctrl
+	addl	$16, %esp
+
   .print_pmem_map_print:
   	pushl	%eax
 	movl	SIZE_HIGH(%edi), %eax

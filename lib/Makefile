@@ -1,5 +1,5 @@
 ASFLAGS	+=	-I../include/ -gstabs+
-OBJS	:=	libs.o libc.o puts.o printf.o kheap.o
+OBJS	:=	libs.o libc.o puts.o printf.o kmalloc.o bitvec.o
 
 .PHONY	:	all clean
 

@@ -16,19 +16,27 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 /*-----------------------------------------------------------------------------
  *  extern from link.ld
  *  there's a global unsigned int var named "end"
  *  it's value is 0, and it's addr is the end of the image
  *-----------------------------------------------------------------------------*/
-/* extern uint32_t end; */
-/* uint32_t place_addr = (uint32_t) &end; */
-static uint32_t place_addr = 0x200000;                              /* 2m */
+/* extern unsigned char *end; */
+/* unsigned char *place_addr = (uint32_t) &end; */
+/* static unsigned char *place_addr = (unsigned char *)0x50000; */
+static unsigned char *place_addr; 
 
-uint32_t __get_heap_addr()
+unsigned char *__get_heap_addr()
 {
 	return place_addr;
+}
+
+void *__set_heap_addr(unsigned char *p)
+{
+	place_addr = p;
+	return NULL;
 }
 
 /* 
@@ -37,38 +45,38 @@ uint32_t __get_heap_addr()
  *  Description:  
  * =====================================================================================
  */
-uint32_t kmalloc_align_pa(size_t size, int is_align, uint32_t *pa)
+void *kmalloc_align_pa(size_t size, int is_align, unsigned char **pa)
 {
 	/*-----------------------------------------------------------------------------
 	 *  align request && non-aligned indeed
 	 *  if just use "if (is_align)", meanwhile it has been aligned,
 	 *  += 0x1000 added also
 	 *-----------------------------------------------------------------------------*/
-	if (is_align && (place_addr & 0x00000fff)) {
-		place_addr &= 0xfffff000;
+	if (is_align && ((uint32_t)place_addr & 0x00000fff)) {
+		place_addr = (unsigned char *)((uint32_t)place_addr & 0xfffff000);
 		place_addr += 0x1000;
 	}
 	if (pa) {
 		*pa = place_addr;
 	}
 
-	memset(place_addr, 0, size);
-	uint32_t tmp = place_addr;
+	memset((unsigned char *)place_addr, 0, size);
+	unsigned char *tmp = place_addr;
 	place_addr += size;
-	return tmp;
+	return (void *)tmp;
 }
 
-uint32_t kmalloc_align(size_t size)
+void *kmalloc_align(size_t size)
 {
 	return kmalloc_align_pa(size, 1, 0);
 }
 
-uint32_t kmalloc_pa(size_t size, uint32_t *pa)
+void *kmalloc_pa(size_t size, unsigned char **pa)
 {
 	return kmalloc_align_pa(size, 0, pa);
 }
 
-uint32_t kmalloc(size_t size)
+void *kmalloc(size_t size)
 {
 	return kmalloc_align_pa(size, 0, 0);
 }

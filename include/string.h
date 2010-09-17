@@ -18,6 +18,11 @@
 #ifndef		STRING_H
 #define		STRING_H
 
-extern	int strlen(const char *);
+#include <stdint.h>
+
+/* libs.s */
+extern size_t strlen(const char *);
+extern void *memset(void *, int, size_t);
+extern void *memcpy(void * restrict , const void * restrict , size_t);
 
 #endif

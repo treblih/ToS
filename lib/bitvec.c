@@ -25,14 +25,14 @@
 #include <bitvec.h>
 
 /* persistent, for pmem */
-static bitvec_t bit_pem;
+static bitvec_t bit_pmem;
 
 bitvec_t *get_bitvec_pmem()
 {
 	return &bit_pmem;
 }
 
-bitvec_t *bitvec_create(is_pmem)
+bitvec_t *bitvec_create(int is_pmem)
 {
 	if (is_pmem) {
 		return &bit_pmem;
@@ -90,6 +90,7 @@ ssize_t bitvec_find_first(bitvec_t *bitvec, int set)
 			if (test % 2 == set) {
 				return (i << 3) + j;	/* the idx */
 			}
+			/* feeling in haskell... */
 			test >>= 1;
 		}
 	}

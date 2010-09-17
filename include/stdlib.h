@@ -22,14 +22,17 @@
 
 #define		NULL	(void *)0
 
+/* libs.s */
+
 /* libc.c */
 extern	int i2s(char *, int, int);
 
 /* kmalloc.c */
-extern uint32_t __get_kheap_start();
-extern uint32_t kmalloc_align_pa(size_t, int, uint32_t *);
-extern uint32_t kmalloc_align(size_t);
-extern uint32_t kmalloc_pa(size_t, uint32_t *);
-extern uint32_t kmalloc(size_t);
+extern void *__get_kheap_start();
+extern void *__set_heap_addr(unsigned char *);
+extern void *kmalloc_align_pa(size_t, int, unsigned char **);
+extern void *kmalloc_align(size_t);
+extern void *kmalloc_pa(size_t, unsigned char **);
+extern void *kmalloc(size_t);
 
 #endif

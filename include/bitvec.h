@@ -39,6 +39,6 @@ extern bitvec_t *bitvec_create(int);
 extern bitvec_t *bitvec_init(bitvec_t *, ssize_t);
 extern void bitvec_free(bitvec_t *);
 extern ssize_t bitvec_find_first(bitvec_t *, int);
-extern void bitvec_ctrl(bitvec_t *, ssize_t, int);
+extern void *bitvec_ctrl(bitvec_t *, ssize_t, ssize_t, int);
 
 #endif
