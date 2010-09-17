@@ -104,7 +104,7 @@ print_pmem_map:
 	pushl	msg_pmem_type_str(, %eax, 4)
 	incl	%eax			# 1 - 4
 	cmp	$1, %eax
-	jne	.print_pmem_map_print
+	je	.print_pmem_map_print
 	/* call	8(%ebp) */
   .print_pmem_map_print:
   	pushl	%eax

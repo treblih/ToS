@@ -21,17 +21,17 @@
 
 /*-----------------------------------------------------------------------------
  *  NOTICE:
- *  unit is u32, not byte
+ *  n, bits
  *-----------------------------------------------------------------------------*/
 #define		BYTES_NEED(n)		(((n) - 1 + 8) >> 3) 
-#define		BIT_INDEX(n)		((n) >> 5)
-#define		BIT_OFFSET(n)		((n) % 32)
+#define		BYTES_IDX(n)		((n) >> 3)
+#define		BIT_OFFSET(n)		((n) % 8)
 #define		BIT_SET			1
 #define		BIT_UNSET		0
 
 typedef struct {
 	int cnt;		/* bits cnt, not bytes */
-	unsigned *addr;
+	unsigned char *addr;
 } bitvec_t;
 
 extern bitvec_t *get_bitvec_pmem(void);

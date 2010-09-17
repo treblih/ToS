@@ -3,7 +3,7 @@
  *
  *       Filename:  bitvec.c
  *
- *    Description:  regard 32 bits(unsigned int) as a unit
+ *    Description:  all args are bits, not bytes not u32
  *
  * 		    the reason why use ssize_t instead of size_t
  * 		    see 
@@ -45,11 +45,11 @@ bitvec_t *bitvec_create(is_pmem)
  *  Description:  num is bits count, not bytes
  * =====================================================================================
  */
-bitvec_t *bitvec_init(bitvec_t *bitvec, ssize_t num)
+bitvec_t *bitvec_init(bitvec_t *bitvec, ssize_t bits)
 {
 	/* init the one for pmem */
-	bitvec->cnt = num;
-	bitvec->addr = kmalloc_align(BYTES_NEED(num));
+	bitvec->cnt = bits;
+	bitvec->addr = kmalloc_align(BYTES_NEED(bits));
 	return bitvec;
 }
 
@@ -77,18 +77,20 @@ void bitvec_free(bitvec_t *bitvec)
 ssize_t bitvec_find_first(bitvec_t *bitvec, int set)
 {
 	unsigned char test;
-	unsigned bit = bitvec->addr;
+	unsigned char *bit = bitvec->addr;
 	int len = BYTES_NEED(bitvec->cnt);
-	for (int i = 0; i < len; i++) {
+	for (int i = 0; i < len; ++i) {
 		/* 8 bits are all 0, next loop */
-		if (set && (!(test = bit[i]))) {
+		if ((!(test = bit[i])) && set) {
 			continue;
 		}
 		for (int j = 0; j < 8; ++j) {
-			/* test % 2 == 1 -> set */
+			/* set   -> test % 2 == 1 */
+			/* unset -> test % 2 == 0 */
 			if (test % 2 == set) {
 				return (i << 3) + j;	/* the idx */
 			}
+			test >>= 1;
 		}
 	}
 	/* that's why use ssize_t instead of size_t */
@@ -98,16 +100,65 @@ ssize_t bitvec_find_first(bitvec_t *bitvec, int set)
 /* 
  * ===  FUNCTION  ======================================================================
  *         Name:  bitvec_ctrl
- *  Description:  set/unset a certain bit
+ *  Description:  set/unset a range of bits
  *
  *  		  NOTICE:
  *  		  parameter idx is 0 ~ (end - 1), not 1 ~ end
- *  		  i.e. the idx in the wanted array, not the NO.
  * =====================================================================================
  */
-void bitvec_ctrl(bitvec_t *bitvec, ssize_t idx, int set)
+void *bitvec_ctrl(bitvec_t *bitvec, ssize_t idx, ssize_t range, int set)
 {
-	(bitvec->addr)[BIT_INDEX(idx)] = set ?
-	(bitvec->addr)[BIT_INDEX(idx)] | (1 << BIT_OFFSET(idx)):
-	(bitvec->addr)[BIT_INDEX(idx)] & (0 << BIT_OFFSET(idx));
+	unsigned char *addr = bitvec->addr + BYTES_IDX(idx);
+	int i;
+	int offset = BIT_OFFSET(idx);
+	int complement = 8 - offset;
+	int bytes = (range - complement) >> 3;
+	int range_offset = (range - complement) % 8;
+
+	if (!range) {
+		return NULL;
+	}
+
+	if (set) {
+		/* 3 steps */
+		/* 1st, deal with all bits in the first bytes */
+		if (complement >= range) {
+			for (i = 0; i < range; ++i) {
+				*addr |= 1 << (offset + i);
+			}
+			return NULL;
+		} else {
+			for (i = 0; i < complement; ++i) {
+				*addr |= 1 << (offset + i);
+			}
+		}
+		addr += 1;
+		/* 2nd, deal with every 8 bits as bytes */
+		for (i = 0; i < bytes; ++i) {
+			*addr++ = 0xff;
+		}
+		/* 3rd, deal with following bits */
+		for (i = 0; i < range_offset; ++i) {
+			*addr |= 1 << i;
+		}
+	} else {
+		if (complement >= range) {
+			for (i = 0; i < range; ++i) {
+				*addr &= ~(1 << (offset + i));
+			}
+			return NULL;
+		} else {
+			for (i = 0; i < complement; ++i) {
+				*addr &= ~(1 << (offset + i));
+			}
+		}
+		addr += 1;
+		for (i = 0; i < bytes; ++i) {
+			*addr++ = 0;
+		}
+		for (i = 0; i < range_offset; ++i) {
+			*addr &= ~(1 << i);
+		}
+	}
+	return NULL;
 }
