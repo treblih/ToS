@@ -1,5 +1,7 @@
+#CFLAGS	:=	-I../include/ -strip -fno-builtin -std=gnu99
 CFLAGS	:=	-I../include/ -gstabs+ -fno-builtin -std=gnu99
 LDFLAGS	:=	-Ttext
+LDSCRIPT:=	-Tlink.ld
 MAKE	:= 	make
 export
 
@@ -24,10 +26,13 @@ cascading:
 $(KRNL)	:	OBJS = $(wildcard  kernel/*.o lib/*.o hal/*.o)
 #$(KRNL)	:	OBJS = $(wildcard  kernel/*.o lib/*.o hal/*.o)
 $(KRNL)	:
-	$(LD) $(LDFLAGS) 0x20100 $(OBJS) -o $(@)
+	$(LD) $(LDSCRIPT) $(OBJS) -o $(@)
 install	:
 	@/usr/local/bin/bximage
 	@dd if=boot/boot.bin of=$(IMG) bs=512 count=1 conv=notrunc 
+	#@dd if=$(KRNL) of=a.elf skip=1
+	#@objcopy -R .pdr -R .comment -R .note -S -O binary $(KRNL) a.elf
+	#@mv a.elf $(KRNL) -f
 	@sudo mount -o loop $(IMG) $(FLOPPY)
 	@sudo cp boot/loader.bin $(FLOPPY) -fv 
 	@sudo cp $(KRNL) $(FLOPPY) -fv 

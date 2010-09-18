@@ -13,9 +13,7 @@ kernel:
 	0x1000		mem_map_entry
 	0x1100		boot_info
 
-	0x20100		exe
-
-	0x2ffff		%esp
+	0x20100-0x2ffff	exe-> <-esp
 
 	0x200000	heap (bitvec struct of pmem)
 	0x201000	bitvec

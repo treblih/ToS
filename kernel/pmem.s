@@ -45,6 +45,15 @@ __pmem_init:
 	call	bitvec_init
 	addl	$8, %esp
 
+	# set 0 - 1m used
+	# bitvec_ctrl(bitvec_t *, ssize_t, ssize_t, int);
+	pushl	$BIT_SET
+	pushl	$0x100			# 0x100000 / 0x1000, 1m / 4k
+	pushl	$0
+	pushl	PMEM_BITVEC_ADDR
+	call	bitvec_ctrl
+	addl	$16, %esp
+
 	call	print_pmem_map
 
 	leave
@@ -120,10 +129,12 @@ print_pmem_map:
 	movl	SIZE_HIGH(%edi), %eax
 	shll	$16, %eax
 	movl	SIZE_LOW(%edi), %eax
+	shll	$2, %eax		# / 4k == block count
 	pushl	%eax
 	movl	START_HIGH(%edi), %eax
 	shll	$16, %eax
 	movl	START_LOW(%edi), %eax
+	shll	$2, %eax		# / 4k == block count
 	pushl	%eax
 	pushl	PMEM_BITVEC_ADDR
 	call	bitvec_ctrl
