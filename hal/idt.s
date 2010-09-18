@@ -292,6 +292,17 @@ exception_handler:
 	call	puts
 	addl	$4, %esp
 
+	# print error code, if has
+	cmp	$0xffffffff, 12(%ebp)
+	je	.exception_handler_no_errcode
+	pushl	$msg_errcode
+	call	puts
+	addl	$4, %esp
+	pushl	12(%ebp)
+	call	h2s
+	addl	$4, %esp
+
+  .exception_handler_no_errcode:
 	# print eip / cs / eflags
 	pushl	$msg_eip
 	call	puts
@@ -347,6 +358,7 @@ msg_ex12:	.asciz "#MC Machine Check"
 msg_ex13:	.asciz "#XF SIMD Floating-Point Exception"
 msg_ex14:	.asciz "    Luck Dude Thank to Default Handler"
 
+msg_errcode:	.asciz "\nerror code: "
 msg_eip:	.asciz "\neip: "
 msg_cs:		.asciz "\ncs:"
 msg_eflags:	.asciz "\neflags:"
