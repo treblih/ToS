@@ -29,7 +29,7 @@ __pmem_init:
 	movl	%eax, PMEM_BLOCK_MAX
 
 	# __set_heap_addr(unsigned char *);
-	pushl	$0x200000
+	pushl	$0x100000
 	call	__set_heap_addr
 	addl	$4, %esp
 

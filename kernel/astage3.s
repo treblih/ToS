@@ -1,3 +1,5 @@
+.include "mem.h"
+
 .text
 .code32
 
@@ -27,7 +29,46 @@ _start:
 	call	puts
 	addl	$4, %esp
 
+	# set up paging
+	# 0 - 4m
+	pushl	$0 | PRESENT | RW
+	pushl	$PT_0
+	call	__pt_init
+	addl	$8, %esp
+	# 3g
+	pushl	$0x200000 | PRESENT | RW
+	pushl	$PT_768
+	call	__pt_init
+	addl	$8, %esp
+
+	movl	$PDE, %edi
+	movl	$PT_0 | PRESENT | RW, (%edi)
+	movl	$768, %eax
+	movl	$PT_768 | PRESENT | RW, (%edi, %eax, 4)
+
+	# copy kernel image from 0x20000 to 0xc0000000
+	xor	%edx, %edx
+	call	__get_image_sectors
+	shll	$7, %eax		# %eax * 512 / 4
+	movl	%eax, %ecx
+	movl	$KRNL_RM_BASE, %esi
+	movl	0x100000, %edi
+	cld
+	rep	movsl
+
+	# enable paging
+	movl	$PDE, %eax
+	movl	%eax, %cr3
+	movl	%cr0, %eax
+	orl	0x80000000, %eax
+	movl	%eax, %cr0
+	
+	jmp	0xc00201cc
+
 	/* call	__KRNL_3G */
+	/* movl	$__kernel, %eax */
+	/* addl	$KRNL_PM_BASE, %eax */
+	/* call	%eax */
 	call	__kernel
 	cli
 	hlt

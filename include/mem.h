@@ -16,3 +16,12 @@
 # offset of elements in struct boot_info
 .equ	MEM_LOW,	4
 .equ	MEM_HIGH,	8
+
+# virtual memroy
+.equ	PDE,		0x40000
+.equ	PT_0,		0x41000
+.equ	PT_768,		0x42000
+
+.equ	PRESENT,	0x1
+.equ	RW,		0x10
+.equ	USER,		0x100
