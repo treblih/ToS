@@ -13,6 +13,8 @@
 tmp
 ma
 core*
+*.log
+
 
 a.s
 .vimrc

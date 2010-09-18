@@ -23,5 +23,5 @@
 .equ	PT_768,		0x42000
 
 .equ	PRESENT,	0x1
-.equ	RW,		0x10
-.equ	USER,		0x100
+.equ	RW,		0x2
+.equ	USER,		0x4

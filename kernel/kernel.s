@@ -9,7 +9,7 @@
 # void __kernel(struct mem_map_entry *, struct boot_info *);
 #------------------------------------------------------------------ 
 __kernel:
-	jmp 	.
+	/* jmp 	. */
 	call	__hal_init
 	call	__pmem_init
 	/* call	__print_pmem_map */
