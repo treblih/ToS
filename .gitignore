@@ -14,11 +14,9 @@ tmp
 ma
 core*
 *.log
-
+bochslog.txt
 
 a.s
 .vimrc
 
-boot/*
-bochs*
 tags
