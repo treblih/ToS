@@ -29,7 +29,7 @@ __pmem_init:
 	movl	%eax, PMEM_BLOCK_MAX
 
 	# __set_heap_addr(unsigned char *);
-	pushl	$0x100000
+	pushl	$0x200000
 	call	__set_heap_addr
 	addl	$4, %esp
 
@@ -69,8 +69,13 @@ __get_pmem_size:
 
 	pushl	%ebx
 	pushl	%edi
-	# (low + 1024 + high * 64)
+
+#----------------------------------------------------
+# MEM_LOW / MEM_HIGH in BOOT_INFO if diff from MEM_MAP_ENTRY
+# in kb
+# 	(low + 1024 + high * 64)
 	movl	$BOOT_INFO_ADDR, %edi
+#----------------------------------------------------
 	movl	MEM_LOW(%edi), %eax
 	addl	$1024, %eax
 	movl	MEM_HIGH(%edi), %ebx
@@ -105,7 +110,11 @@ print_pmem_map:
 	subl	$8, %esp
 	movl	$0, -4(%ebp)		# int i = 0;
 
+#----------------------------------------------------
+# START_LOW / START_HIGH in MEM_MAP_ENTRY if diff from BOOT_INFO
+# in bytes
 	movl	$MEM_MAP_ENTRY_ADDR, %edi
+#----------------------------------------------------
   .print_pmem_map_loop:
 	cmp	$0, -4(%ebp)
 	jle	.print_pmem_map_item
@@ -122,33 +131,39 @@ print_pmem_map:
 	pushl	msg_pmem_type_str(, %eax, 4)
 	incl	%eax			# 1 - 4
 	cmp	$1, %eax
+	pushl	%eax
 	je	.print_pmem_map_print
 
+	# if type != 1, set the corresponding pmem bits to 1, namely, used
 	# bitvec_ctrl(bitvec_t *, ssize_t, ssize_t, int);
 	pushl	$BIT_SET
 	movl	SIZE_HIGH(%edi), %eax
 	shll	$16, %eax
-	movl	SIZE_LOW(%edi), %eax
-	shll	$2, %eax		# / 4k == block count
+	addl	SIZE_LOW(%edi), %eax
+	shrl	$12, %eax		# / 4k == block count
 	pushl	%eax
 	movl	START_HIGH(%edi), %eax
 	shll	$16, %eax
-	movl	START_LOW(%edi), %eax
-	shll	$2, %eax		# / 4k == block count
+	addl	START_LOW(%edi), %eax
+	# see the last in the memory map entry, u'll know
+	cmp	$0, %eax
+	je	.print_pmem_map_print
+	shrl	$12, %eax		# / 4k == block start
 	pushl	%eax
 	pushl	PMEM_BITVEC_ADDR
 	call	bitvec_ctrl
 	addl	$16, %esp
 
   .print_pmem_map_print:
+  	popl	%eax
   	pushl	%eax
 	movl	SIZE_HIGH(%edi), %eax
 	shll	$16, %eax
-	movl	SIZE_LOW(%edi), %eax
+	addl	SIZE_LOW(%edi), %eax
 	pushl	%eax
 	movl	START_HIGH(%edi), %eax
 	shll	$16, %eax
-	movl	START_LOW(%edi), %eax
+	addl	START_LOW(%edi), %eax
 	pushl	%eax
 	pushl	-4(%ebp)
 	pushl	$msg_pmem_map

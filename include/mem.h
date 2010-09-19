@@ -6,6 +6,7 @@
 .equ	MM_ENTRY_SIZE,	20
 
 # offset of elements in struct mem_map_entry
+# in bytes, not kb
 .equ	START_LOW,	0
 .equ	START_HIGH,	4
 .equ	SIZE_LOW,	8
@@ -14,6 +15,7 @@
 
 .equ	SMAP,		0x534d4150
 # offset of elements in struct boot_info
+# in kb, not bytes
 .equ	MEM_LOW,	4
 .equ	MEM_HIGH,	8
 

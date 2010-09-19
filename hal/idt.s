@@ -272,7 +272,8 @@ __simd_fault:
 exception:
 	call	exception_handler
 	addl	$8, %esp	# skip vec_no & error_code to eip - cs -eflags
-        hlt
+	jmp	.
+        /* hlt */
 
 #------------------------------------------------------------------ 
 # void exception_handler(int vec, int err, int eip, int cs, int eflags)

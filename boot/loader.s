@@ -340,17 +340,65 @@ pm_start:
 	movw	%ax, %gs
 	movw	%ax, %ss
 	movl	$0x2ffff, %esp
+
+	# copy kernel image from 0x20000 to 1m
+	movl	IMAGE_SECTORS, %ecx
+	shll	$7, %ecx		# %ecx * 512 / 4
+	movl	$KRNL_RM_BASE, %esi
+	movl	$0x100000, %edi
+	cld
+	rep	movsl
 	
-	/* jmp	0xc00201cc */
+	# set up paging
+	# 0 - 4m
+	pushl	$0 | PRESENT | RW
+	pushl	$PT_0
+	call	__pt_init
+	addl	$8, %esp
+	# 3g
+	pushl	$0x100000 | PRESENT | RW
+	pushl	$PT_768
+	call	__pt_init
+	addl	$8, %esp
+
+	movl	$PDE, %edi
+	movl	$PT_0 | PRESENT | RW, (%edi)
+	movl	$768, %eax
+	movl	$PT_768 | PRESENT | RW, (%edi, %eax, 4)
+
+	# enable paging
+	movl	$PDE, %eax
+	movl	%eax, %cr3
+	movl	%cr0, %eax
+	orl	$0x80000000, %eax
+	movl	%eax, %cr0
 
 	/* call	__KRNL_3G */
 	/* movl	$__kernel, %eax */
 	/* addl	$KRNL_PM_BASE, %eax */
 	/* call	%eax */
-	jmp	0x20100
+	jmp	0xc0000100
 	cli
 	hlt
 
+#------------------------------------------------------------------ 
+# __pt_init(unsigned *, unsigned);
+#------------------------------------------------------------------ 
+__pt_init:
+	pushl	%ebp
+	movl	%esp, %ebp
+
+	movl	8(%ebp), %eax
+	movl	12(%ebp), %ebx
+	movl	$1024, %ecx
+  .__pt_init_loop:
+  	movl	%ebx, (%eax)
+	addl	$4, %eax
+	addl	$4096, %ebx
+  	loop	.__pt_init_loop
+
+	leave
+	ret
 
 .data
 sector: 		.byte 0
