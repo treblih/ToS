@@ -1,5 +1,5 @@
-.include "pmode.h"
-.include "pic.h"
+.include "pmode.inc"
+.include "pic.inc"
 
 .globl	__pit_init
 .globl	__get_pit_cnt

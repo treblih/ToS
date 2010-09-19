@@ -1,4 +1,4 @@
-.include "pmode.h"
+.include "pmode.inc"
 
 .globl	__x86_idt_init
 .globl	__idt_set

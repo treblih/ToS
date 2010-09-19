@@ -1,4 +1,4 @@
-.include "pic.h"
+.include "pic.inc"
 
 .globl	__x86_pic_init
 .globl	__interrupt_done

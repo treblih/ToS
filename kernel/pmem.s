@@ -1,4 +1,4 @@
-.include "mem.h"
+.include "mem.inc"
 
 .equ	BIT_SET,	1
 .equ	BIT_PMEM,	1
@@ -102,7 +102,7 @@ print_pmem_size:
 	ret
 
 #------------------------------------------------------------------ 
-# void print_pmem_map(void *callback);
+# void print_pmem_map();
 #------------------------------------------------------------------ 
 print_pmem_map:
 	pushl	%ebp

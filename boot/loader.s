@@ -1,5 +1,5 @@
-.include "pmode.h"
-.include "mem.h"
+.include "pmode.inc"
+.include "mem.inc"
 
 .text
 .code16
@@ -353,12 +353,12 @@ pm_start:
 	# 0 - 4m
 	pushl	$0 | PRESENT | RW
 	pushl	$PT_0
-	call	__pt_init
+	call	pt_init
 	addl	$8, %esp
 	# 3g
 	pushl	$0x100000 | PRESENT | RW
 	pushl	$PT_768
-	call	__pt_init
+	call	pt_init
 	addl	$8, %esp
 
 	movl	$PDE, %edi
@@ -382,23 +382,24 @@ pm_start:
 	hlt
 
 #------------------------------------------------------------------ 
-# __pt_init(unsigned *, unsigned);
+# pt_init(unsigned *, unsigned);
 #------------------------------------------------------------------ 
-__pt_init:
+pt_init:
 	pushl	%ebp
 	movl	%esp, %ebp
 
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %ebx
 	movl	$1024, %ecx
-  .__pt_init_loop:
+  .pt_init_loop:
   	movl	%ebx, (%eax)
 	addl	$4, %eax
 	addl	$4096, %ebx
-  	loop	.__pt_init_loop
+  	loop	.pt_init_loop
 
 	leave
 	ret
+
 
 .data
 sector: 		.byte 0

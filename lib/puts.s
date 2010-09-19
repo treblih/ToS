@@ -1,4 +1,4 @@
-.include "mem.h"
+.include "mem.inc"
 
 
 .globl	puts

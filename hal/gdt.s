@@ -1,4 +1,4 @@
-.include "pmode.h"
+.include "pmode.inc"
 
 .globl	__x86_gdt_init
 
