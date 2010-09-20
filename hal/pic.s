@@ -1,9 +1,12 @@
 .include "pic.inc"
 
+.section .text
+
 .globl	__x86_pic_init
 .globl	__interrupt_done
 .globl	__irq_enable
 
+	.type	__x86_pic_init, @function
 __x86_pic_init:
 	pushl	%eax
 
@@ -42,6 +45,7 @@ __x86_pic_init:
 #
 # send EOI to PIC
 #------------------------------------------------------------------ 
+	.type	__interrupt_done, @function
 __interrupt_done:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -67,6 +71,7 @@ __interrupt_done:
 #
 # enable an IRQ
 #------------------------------------------------------------------ 
+	.type	__irq_enable, @function
 __irq_enable:
 	pushl	%ebp
 	movl	%esp, %ebp

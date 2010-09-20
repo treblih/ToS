@@ -1,8 +1,10 @@
 .include "pmode.inc"
 
+.section .text
+
 .globl	__x86_gdt_init
 
-
+	.type	__x86_gdt_init, @function
 __x86_gdt_init:
 	call	trans_gdt
 	pushl	$msg_trans_gdt
@@ -10,6 +12,7 @@ __x86_gdt_init:
 	addl	$4, %esp
 	ret
 
+	.type	trans_gdt, @function
 trans_gdt:
 	pushl	%eax
 	xor	%eax, %eax
@@ -31,6 +34,7 @@ trans_gdt:
 	popl	%eax
 	ret
 
+	.type	flush_sreg, @function
 flush_sreg:
 	jmp	$slc_krnl_rx, $.flush_sreg  # flush cs
   .flush_sreg:
@@ -44,6 +48,7 @@ flush_sreg:
 	ret
 
 
+.section .data
 msg_trans_gdt:	.asciz "transfered gdt to 0xd00\n"	# following IDT
 
 __gdt:

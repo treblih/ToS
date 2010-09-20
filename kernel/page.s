@@ -1,13 +1,13 @@
 .include "mem.inc"
 
 .text
-.code32
 
 .globl	__pt_init
 
 #------------------------------------------------------------------ 
 # __pt_init(unsigned *, unsigned);
 #------------------------------------------------------------------ 
+	.type	__pt_init, @function
 __pt_init:
 	pushl	%ebp
 	movl	%esp, %ebp

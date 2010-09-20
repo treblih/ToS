@@ -1,6 +1,8 @@
+.section .text
+
 .globl	__hal_init
 
-
+	.type	__hal_init, @function
 __hal_init:
 	pushl	$msg_hal
 	call	puts
@@ -11,4 +13,5 @@ __hal_init:
 	/* call	__kb_init */
 	ret
 
+.section .data
 msg_hal:	.asciz "initializing hal...\n"

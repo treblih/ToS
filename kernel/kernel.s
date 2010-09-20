@@ -1,7 +1,6 @@
 .include "mem.inc"
 
-.text
-.code32
+.section .text
 
 .globl	_start
 
@@ -29,4 +28,5 @@ _start:
 	call	h2s
 	addl	$4, %esp
 
+.section .data
 msg_pmode:	.asciz "now in protect mode\n"

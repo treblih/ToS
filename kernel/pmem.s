@@ -3,8 +3,7 @@
 .equ	BIT_SET,	1
 .equ	BIT_PMEM,	1
 
-.text
-.code32
+.section .text
 
 .globl	__pmem_init
 .globl	__get_pmem_size
@@ -15,6 +14,7 @@
 # get bit vectors for physical memory by kmalloc_align
 # then init the bit vectors
 #------------------------------------------------------------------ 
+	.type	__pmem_init, @function
 __pmem_init:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -63,6 +63,7 @@ __pmem_init:
 # unsigned __get_pmem_size();
 # ret:	%eax	memory size in kb
 #------------------------------------------------------------------ 
+	.type	__get_pmem_size, @function
 __get_pmem_size:
 	cmp	$0, PMEM_SIZE
 	jg	.__get_pmem_size_end	# P_MEM_SIZE has been inited
@@ -90,6 +91,7 @@ __get_pmem_size:
   	movl	PMEM_SIZE, %eax
 	ret
 
+	.type	print_pmem_size, @function
 print_pmem_size:
 	pushl	%eax
   	movl	PMEM_SIZE, %eax
@@ -104,6 +106,7 @@ print_pmem_size:
 #------------------------------------------------------------------ 
 # void print_pmem_map();
 #------------------------------------------------------------------ 
+	.type	print_pmem_map, @function
 print_pmem_map:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -180,11 +183,7 @@ print_pmem_map:
 	ret
 
 
-PMEM_SIZE:		.long	0
-PMEM_BLOCK_MAX:		.long	0
-PMEM_BLOCK_USED:	.long	0
-PMEM_BITVEC_ADDR:	.long	0
-
+.section .data
 # no ',' follows the last 1 in every line, otherwise as regrads it as a NULL pointer
 msg_pmem_type_str:
 .long	msg_pmem_map_type1, msg_pmem_map_type2
@@ -198,3 +197,9 @@ msg_pmem_map_type4:	.asciz "acpi nvs memory"
 msg_pmem_init:	.asciz "initializing physical memory structure ...\n"
 msg_pmem_size:	.asciz "your computer has %d mb physical memory\n"
 msg_pmem_map:	.asciz "area: %d, start: 0x%8x, length: 0x%8x, type: %d(%s)\n"
+
+.section .bss
+.lcomm PMEM_SIZE, 	4
+.lcomm PMEM_BLOCK_MAX,	4
+.lcomm PMEM_BLOCK_USED, 4
+.lcomm PMEM_BITVEC_ADDR,4

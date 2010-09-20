@@ -1,3 +1,5 @@
+.section .text
+
 .globl	__screen_clear
 .globl	__asm_debug
 .globl	__wait
@@ -7,6 +9,7 @@
 .globl	memset
 .globl	memcpy
 
+	.type	__screen_clear, @function
 __screen_clear:
 	pushl	%eax
 	pushl	%ecx
@@ -21,6 +24,7 @@ __screen_clear:
 	popl	%eax
 	ret
 
+	.type	__asm_debug, @function
 __asm_debug:
         push    %eax                 # reserve %eax, %esi
         push    %esi
@@ -40,6 +44,7 @@ __asm_debug:
         pop     %eax
         ret             # now _bochs_debug is a func, so ret needed
 
+	.type	__wait, @function
 __wait:
 	pushl	%ecx
 
@@ -58,6 +63,7 @@ __wait:
 #------------------------------------------------------------------ 
 # convert a long hex to string
 #------------------------------------------------------------------ 
+	.type	h2s, @function
 h2s:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -103,6 +109,7 @@ h2s:
 #------------------------------------------------------------------ 
 # int strlen(const char *);
 #------------------------------------------------------------------ 
+	.type	strlen, @function
 strlen:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -124,6 +131,7 @@ strlen:
 #------------------------------------------------------------------ 
 # void *memset(void *s, int c, size_t n);
 #------------------------------------------------------------------ 
+	.type	memset, @function
 memset:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -149,6 +157,7 @@ memset:
 # 	esi source
 #	ecx how many
 #------------------------------------------------------------------ 
+	.type	memcpy, @function
 memcpy:
 	pushl 	%ebp
 	movl	%esp, %ebp

@@ -1,5 +1,7 @@
 .include "pmode.inc"
 
+.section .text
+
 .globl	__x86_idt_init
 .globl	__idt_set
 
@@ -31,6 +33,7 @@
 #  cpu generated exceptions(trap/fault/abort):
 #  err_code - eip - cs - eflags
 #-----------------------------------------------------------------------------
+	.type	__x86_idt_init, @function
 __x86_idt_init:
 	pushl	%eax
 
@@ -167,6 +170,7 @@ __x86_idt_init:
 #------------------------------------------------------------------ 
 # void __idt_set(int vector, void *offset, int attr, int slc)
 #------------------------------------------------------------------ 
+	.type	__idt_set, @function
 __idt_set:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -200,75 +204,95 @@ __idt_set:
 	leave
 	ret
 
+	.type	__divide_error, @function
 __divide_error:
 	pushl	$0xffffffff	# no err code
 	pushl	$0x00		# vec_no	= 0
 	jmp	exception
+	.type	__single_step, @function
 __single_step:
 	pushl	$0xffffffff	# no err code
 	pushl	$0x01		# vec_no	= 1
 	jmp	exception
+	.type	__nmi, @function
 __nmi:
 	pushl	$0xffffffff	# no err code
 	pushl	$0x02		# vec_no	= 2
 	jmp	exception
+	.type	__breakpoint, @function
 __breakpoint:
 	pushl	$0xffffffff	# no err code
 	pushl	$0x03		# vec_no	= 3
 	jmp	exception
+	.type	__overflow, @function
 __overflow:
 	pushl	$0xffffffff	# no err code
 	pushl	$0x04		# vec_no	= 4
 	jmp	exception
+	.type	__bounds_check, @function
 __bounds_check:
 	pushl	$0xffffffff	# no err code
 	pushl	$0x05		# vec_no	= 5
 	jmp	exception
+	.type	__inval_opcode, @function
 __inval_opcode:
 	pushl	$0xffffffff	# no err code
 	pushl	$0x06		# vec_no	= 6
 	jmp	exception
+	.type	__copr_not_available, @function
 __copr_not_available:
 	pushl	$0xffffffff	# no err code
 	pushl	$0x07		# vec_no	= 7
 	jmp	exception
+	.type	__double_fault, @function
 __double_fault:
 	pushl	$0x08		# vec_no	= 8
 	jmp	exception
+	.type	__copr_seg_overrun, @function
 __copr_seg_overrun:
 	pushl	$0xffffffff	# no err code
 	pushl	$0x09		# vec_no	= 9
 	jmp	exception
+	.type	__inval_tss, @function
 __inval_tss:
 	pushl	$0x0a		# vec_no	= a
 	jmp	exception
+	.type	__segment_not_present, @function
 __segment_not_present:
 	pushl	$0x0b		# vec_no	= b
 	jmp	exception
+	.type	__stack_seg_fault, @function
 __stack_seg_fault:
 	pushl	$0x0c		# vec_no	= c
 	jmp	exception
+	.type	__general_protection, @function
 __general_protection:
 	pushl	$0x0d		# vec_no	= d
 	jmp	exception
+	.type	__page_fault, @function
 __page_fault:
 	pushl	$0x0e		# vec_no	= e
 	jmp	exception
+	.type	__fpu_fault, @function
 __fpu_fault:                     # yes, it's right. 'cause INTEL has reserved 0xf
 	pushl	$0xffffffff	# no err code
 	pushl	$0x10		# vec_no	= 0x10
 	jmp	exception
+	.type	__align_fault, @function
 __align_fault:
 	pushl	$0x11		# vec_no	= 0x11
 	jmp	exception
+	.type	__machine_abort, @function
 __machine_abort:
 	pushl	$0x12
 	jmp	exception
+	.type	__simd_fault, @function
 __simd_fault:
 	pushl	$0xffffffff
 	pushl	$0x13
 	jmp	exception
 
+	.type	exception, @function
 exception:
 	call	exception_handler
 	addl	$8, %esp	# skip vec_no & error_code to eip - cs -eflags
@@ -278,6 +302,7 @@ exception:
 #------------------------------------------------------------------ 
 # void exception_handler(int vec, int err, int eip, int cs, int eflags)
 #------------------------------------------------------------------ 
+	.type	exception_handler, @function
 exception_handler:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -329,7 +354,7 @@ exception_handler:
 	leave
 	ret
 	
-
+.section .data
 # no ',' follows the last 1 in every line, otherwise as regrads it as a NULL pointer
 msg_ex_str:
 .long msg_ex00, msg_ex01, msg_ex02, msg_ex03, msg_ex04
@@ -364,4 +389,5 @@ msg_eip:	.asciz "\neip: "
 msg_cs:		.asciz "\ncs:"
 msg_eflags:	.asciz "\neflags:"
 
-__idtr:		.fill 6
+.section .bss
+.lcomm __idtr,	6

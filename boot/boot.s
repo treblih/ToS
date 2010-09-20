@@ -1,4 +1,4 @@
-.text
+.section .text
 .code16	
 
 .equ	mem_root, 0x7e00 # 0x7c00 + 0x200

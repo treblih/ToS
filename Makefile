@@ -26,6 +26,7 @@ cascading:
 $(KRNL)	:	OBJS = $(wildcard  kernel/*.o lib/*.o hal/*.o)
 #$(KRNL)	:	OBJS = $(wildcard  kernel/*.o lib/*.o hal/*.o)
 $(KRNL)	:
+	#$(LD) $(LDFLAGS) 0x100100 $(OBJS) -o $(@)
 	$(LD) $(LDSCRIPT) $(OBJS) -o $(@)
 install	:
 	@/usr/local/bin/bximage

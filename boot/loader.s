@@ -1,7 +1,7 @@
 .include "pmode.inc"
 .include "mem.inc"
 
-.text
+.section .text
 .code16
 
 .equ	bpb_RootEntries, 224
@@ -124,6 +124,7 @@ cluster_sequence:
 	#movb	$1, %al		# write mode
 	#int	$0x10
 	#ret	
+	.type 	print, @function
 print:
 	lodsb			
 	or	%al, %al	
@@ -139,6 +140,7 @@ print:
 #	cx how many at 1 time
 # 	bx load to es:bx
 #------------------------------------------------------------------ 
+	.type 	read_secs, @function
 read_secs:
 	movw	$5, %di  	# five retries for error
   .sectorloop:
@@ -171,6 +173,7 @@ read_secs:
 # lba = kernel_start_clus - 2 + 33
 # arg:	ax
 #------------------------------------------------------------------ 
+	.type	clus2lba, @function
 clus2lba:
 	subw    $2, %ax  
 	addw    $data_start, %ax
@@ -182,6 +185,7 @@ clus2lba:
 # sector    = (logical sector MOD sectors per track) + 1
 # arg:	ax LBA
 #------------------------------------------------------------------ 
+	.type	lba2chs, @function
 lba2chs:
 	pushw	%cx
 	divb	bpb_SectorsPerTrack
@@ -202,6 +206,7 @@ lba2chs:
 # arg:	ax current cluster
 # ret:	ax the next cluster
 #------------------------------------------------------------------ 
+	.type	next_cluster, @function
 next_cluster:
 	pushw	%bx
 	pushw	%dx
@@ -224,6 +229,7 @@ next_cluster:
 	popw	%bx
     	ret
 
+	.type	kill_flp_motor, @function
 kill_flp_motor:
 	pushw	%dx
 	movw	$0x3f2, %dx
@@ -232,6 +238,7 @@ kill_flp_motor:
 	popw	%dx
 	ret
 
+	.type	no_kernel, @function
 no_kernel:
 	movw 	$msg_no_kernel, %si
 	call	print
@@ -248,6 +255,7 @@ no_kernel:
 # arg:	es:di	destination buffer for entries
 # ret:	bp	entry count
 #---------------------------------------------
+	.type	get_mem_map, @function
 get_mem_map:
 	push	%bp
 	xor	%ebp, %ebp
@@ -289,6 +297,7 @@ get_mem_map:
 # ret:	eax	extended memory between 1MB and 16MB in KB
 #	ebx	extended memory above 16MB, in 64KB blocks
 #----------------------------------------------------------
+	.type	get_mem_size, @function
 get_mem_size:
 	pushw	%cx
 	pushw	%dx
@@ -315,6 +324,7 @@ get_mem_size:
 #----------------------------------------------------------
 # prepare for PMODE
 #----------------------------------------------------------
+	.type	prepare_pmode, @function
 prepare_pmode:
 	movl	IMAGE_SECTORS, %edx
 	lgdt	__gdtr
@@ -330,8 +340,10 @@ prepare_pmode:
 	/* ljmpl	$slc_krnl_rx, $KRNL_RM_BASE + 0x100 */
 	ljmpl	$slc_krnl_rx, $pm_start
 
-.text
+
+.section .text
 .code32
+.align 32
 pm_start:
 	# flush sregs
 	movl	$0x10, %eax
@@ -384,6 +396,7 @@ pm_start:
 #------------------------------------------------------------------ 
 # pt_init(unsigned *, unsigned);
 #------------------------------------------------------------------ 
+	.type	pt_init, @function
 pt_init:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -401,17 +414,18 @@ pt_init:
 	ret
 
 
-.data
-sector: 		.byte 0
-head:   		.byte 0
-cylinder:  		.byte 0
-rootent_loop:		.byte 0		# from 224 to 0
-kernel_start_clus:     	.word 0
+.section .bss
+.lcomm sector, 			1
+.lcomm head, 			1
+.lcomm cylinder, 		1
+.lcomm rootent_loop, 		1	# from 224 to 0
+.lcomm kernel_start_clus, 	2
+.lcomm IMAGE_SECTORS, 		4
+
+.section .data
 bpb_SectorsPerTrack:	.word 18
-IMAGE_SECTORS:		.long 0
 
 kernel_name:		.ascii "KERNEL  ELF"
-
 msg_loader_welcome:	.asciz "Welcome to Loader Stage 2\r\n"	# 25
 msg_search_kernel:  	.asciz "Searching Kernel\r\n"		# 16
 msg_kernel_found:	.asciz "Kernel Found, Loading..\r\n"	# 23

@@ -1,5 +1,6 @@
 .include "mem.inc"
 
+.section .text
 
 .globl	puts
 .globl	puts_dst
@@ -13,6 +14,7 @@
 # print the string according to the sys cursor position & update it
 # base off puts
 #------------------------------------------------------------------------------------------------ 
+	.type	puts, @function
 puts:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -34,6 +36,7 @@ puts:
 # print the string according to the specified (x, y)
 # base off puts
 #------------------------------------------------------------------------------------------------ 
+	.type	puts_dst, @function
 puts_dst:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -64,6 +67,7 @@ puts_dst:
 #
 # print string core func, if meet with '\n', cr + lf, like Linux
 #------------------------------------------------------------------------------------------------ 
+	.type	puts_base, @function
 puts_base:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -102,6 +106,7 @@ puts_base:
 	leave
 	ret
 
+	.type	__puts_tos, @function
 __puts_tos:
 	pusha
 	movl	$14, %ecx	# logo height, 14
@@ -123,9 +128,8 @@ __puts_tos:
 	popa
 	ret
 
-
+.section .data
 cur_pos:	.long 0xb8000
-
 
 # 52 chars + NULL
 msg_tos:

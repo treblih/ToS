@@ -1,6 +1,8 @@
 .include "pmode.inc"
 .include "pic.inc"
 
+.section .text
+
 .globl	__pit_init
 .globl	__get_pit_cnt
 
@@ -9,6 +11,7 @@
 .equ	RATE_GENERATOR,	0x34
 
 # void __idt_set(void *dst, void *offset, int attr, int slc)
+	.type	__pit_init, @function
 __pit_init:
 	pushl	%eax
 
@@ -37,10 +40,12 @@ __pit_init:
 	popl	%eax
 	ret
 
+	.type	__get_pit_cnt, @function
 __get_pit_cnt:
 	movl	pit_cnt, %eax
 	ret
 
+	.type	pit_handler, @function
 pit_handler:
 	cli
 	addl	$1, pit_cnt
@@ -50,4 +55,5 @@ pit_handler:
 	sti
 	ret
 
-pit_cnt:	.long 0
+.section .bss
+.lcomm pit_cnt, 4
