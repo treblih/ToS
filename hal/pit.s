@@ -24,18 +24,11 @@ __pit_init:
 	movb	$0x2e, %al
 	outb	$TC0
 
-	# awake in IDT
-	pushl	$slc_krnl_rx
-	pushl	$IDT_IGATE | DPL0
-	pushl	$pit_handler
-	pushl	$0x20		# 1st in PIC
-	call	__idt_set
-	addl	$16, %esp
-
 	# enable the IRQ
+	pushl	$pit_handler
 	pushl	$IRQ_TIMER
 	call	__irq_enable
-	addl	$4, %esp
+	addl	$8, %esp
 
 	popl	%eax
 	ret

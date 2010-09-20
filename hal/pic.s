@@ -1,3 +1,4 @@
+.include "pmode.inc"
 .include "pic.inc"
 
 .section .text
@@ -5,6 +6,7 @@
 .globl	__x86_pic_init
 .globl	__interrupt_done
 .globl	__irq_enable
+.globl	__get_irq_handler
 
 	.type	__x86_pic_init, @function
 __x86_pic_init:
@@ -67,9 +69,7 @@ __interrupt_done:
 	ret
 
 #------------------------------------------------------------------ 
-# void __irq_enable(int vec);
-#
-# enable an IRQ
+# void __irq_enable(int vec, void *offset);
 #------------------------------------------------------------------ 
 	.type	__irq_enable, @function
 __irq_enable:
@@ -78,6 +78,7 @@ __irq_enable:
 	pushf                                            
 	pusha
 	xor	%eax, %eax
+	# %ecx always holds the int vec
 	movl	8(%ebp), %ecx
 	movb	$~1, %dl                               
 	rol	%cl, %dl                                
@@ -88,14 +89,85 @@ __irq_enable:
 	inb	$REG_IMR                                      
 	andb	%dl, %al                               
 	outb  	$REG_IMR
-	jmp   	.__irq_enable_end                                         
+	jmp   	.__irq_enable_set_idt
 	# IRQ 8-15 -- 0xa1 OCW1
   .__irq_enable_slave:
 	inb   	$REG_IMR_S
 	andb  	%dl, %al                               
 	outb   	$REG_IMR_S
-  .__irq_enable_end:
+  .__irq_enable_set_idt:
+	pushl	$slc_krnl_rx
+	pushl	$IDT_IGATE | DPL0
+	movl	irq_in_idt(, %ecx, 4), %eax
+	pushl	%eax
+	movl	%ecx, %edx
+	addl	$0x20, %edx	# irq starts from 0x20
+	pushl	%edx
+	call	__idt_set
+	addl	$16, %esp
+
+	# set in irq_handler_table
+	movl	12(%ebp), %eax	# func pointer
+	movl	%eax, irq_handler_table(, %ecx, 4);
+
   	popa
 	popf                                             
 	leave
+	ret 
+
+
+	.type	__irq0, @function
+__irq0: irq_m	0	
+	.type	__irq1, @function
+__irq1: irq_m	1	
+	.type	__irq2, @function
+__irq2: irq_m	2	
+	.type	__irq3, @function
+__irq3: irq_m	3
+	.type	__irq4, @function
+__irq4: irq_m	4	
+	.type	__irq5, @function
+__irq5: irq_m 	5
+	.type	__irq6, @function
+__irq6: irq_m	6
+	.type	__irq7, @function
+__irq7: irq_m	7
+
+	.type	__irq8, @function
+__irq8: irq_s	0	
+	.type	__irq9, @function
+__irq9: irq_s	1	
+	.type	__irqa, @function
+__irqa: irq_s	2	
+	.type	__irqb, @function
+__irqb: irq_s	3
+	.type	__irqc, @function
+__irqc: irq_s	4	
+	.type	__irqd, @function
+__irqd: irq_s 	5
+	.type	__irqe, @function
+__irqe: irq_s	6
+	.type	__irqf, @function
+__irqf: irq_s	7
+
+#------------------------------------------------------------------ 
+# void *__get_irq_handler(int);
+#------------------------------------------------------------------ 
+	.type	__get_irq_handler, @function
+__get_irq_handler:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %eax
+	movl	irq_handler_table(, %eax, 4), %eax
+	leave
 	ret
+
+.section .data
+irq_in_idt:
+.long	__irq0, __irq1, __irq2, __irq3	
+.long	__irq4, __irq5, __irq6, __irq7	
+.long	__irq8, __irq9, __irqa, __irqb	
+.long	__irqc, __irqd, __irqe, __irqf	
+
+.section .bss
+.lcomm irq_handler_table, 4 * 0x10

@@ -1,5 +1,4 @@
-#CFLAGS	:=	-I../include/ -strip -fno-builtin -std=gnu99
-CFLAGS	:=	-I../include/ -gstabs+ -fno-builtin -std=gnu99
+CFLAGS	:=	-I../include/ -fno-builtin -std=gnu99
 LDFLAGS	:=	-Ttext
 LDSCRIPT:=	-Tlink.ld
 MAKE	:= 	make

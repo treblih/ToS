@@ -19,7 +19,6 @@ _start:
 
 	call	__hal_init
 	call	__pmem_init
-	/* call	__page_init */
 	
 	jmp	.
 	/* sti */

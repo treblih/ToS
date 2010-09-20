@@ -15,6 +15,8 @@
  * =====================================================================================
  */
 
+#include <stdint.h>
+
 /* void kb_read(TTY * p_tty) */
 void __kb_buf_decode()
 {
@@ -153,7 +155,7 @@ void __kb_buf_decode()
 				break;
 			default:
 				if (make) {
-					kbuf_to_tbuf(keyval, p_tty);
+					/* kbuf_to_tbuf(keyval, p_tty); */
 				}
 				break;
 			}

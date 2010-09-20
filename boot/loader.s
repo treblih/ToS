@@ -134,6 +134,7 @@ print:
 	jmp	print
   .print_end:
 	ret	
+
 #------------------------------------------------------------------ 
 # int 0x13, func 0x2
 # arg:	ax starting sector
@@ -162,7 +163,12 @@ read_secs:
 	popw    %bx
 	popw    %ax
 	jnz     .sectorloop     # read again
-	int     $0x18		# execute Cassette BASIC
+	#------------------------------------------------------------------ 
+	# int 0x18 traditionally jumped to an implementation of BASIC stored in ROM. 
+	# This call would typically be invoked if the BIOS was unable to identify 
+	# any bootable volumes on startup
+	#------------------------------------------------------------------ 
+	int     $0x18		
   .success:
 	popw    %cx
 	popw    %bx

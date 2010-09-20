@@ -1,4 +1,4 @@
-ASFLAGS	+=	-I../include/
+ASFLAGS	+=	-I../include/ -gstabs+
 OBJCOPY	:=	objcopy
 OBJFLAGS:=	-R .pdr -R .comment -R .note -S -O binary
 
