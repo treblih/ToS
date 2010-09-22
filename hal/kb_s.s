@@ -4,12 +4,15 @@
 .section .text
 
 .globl	__kb_init
+.globl	__led_init
 .globl	__kb_buf_read
 .globl	__get_kb_buf_cnt
+.globl	__get_lock_key
+.globl	__reverse_lock_key
 
 	.type	__kb_init, @function
 __kb_init:
-	call 	led_init
+	call 	__led_init
 	# enable the IRQ
 	pushl	$kb_buf_write
 	pushl	$IRQ_KEYBOARD
@@ -18,7 +21,7 @@ __kb_init:
 	ret
 
 	.type	led_init, @function
-led_init:
+__led_init:
 	pushl	%ebp
 	movl	%esp, %ebp
 	pushl	%eax
@@ -68,6 +71,7 @@ clear_8042:
 	ret
 
 #------------------------------------------------------------------ 
+# uint32_t __kb_buf_read();
 # get a scan code from kb software buffer
 #------------------------------------------------------------------ 
 	.type	__kb_buf_read, @function
@@ -88,6 +92,9 @@ __kb_buf_read:
 	leave
 	ret
 
+#------------------------------------------------------------------ 
+# ssize_t __get_kb_buf_cnt();
+#------------------------------------------------------------------ 
 	.type	__get_kb_buf_cnt, @function
 __get_kb_buf_cnt:
 	movl	cnt, %eax
@@ -113,15 +120,41 @@ kb_buf_write:
 	incl	cnt
 	incl	head
 	ret
+
+#------------------------------------------------------------------ 
+# uint8_t __get_lock_key(int which);
+#------------------------------------------------------------------ 
+	.type	__get_lock_key, @function
+__get_lock_key:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %eax
+	subl	$0x10e, %eax	# see in kb.h
+	movzbl	caps_lock(, %eax, 1), %eax
+	leave
+	ret
+
+#------------------------------------------------------------------ 
+# void __reverse_lock_key(int which);
+#------------------------------------------------------------------ 
+	.type	__reverse_lock_key, @function
+__reverse_lock_key:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %eax
+	subl	$0x10e, %eax	# see in kb.h
+	cmpb	$0, caps_lock(, %eax, 1)
+	je	.0to1
+	movb	$0, caps_lock(, %eax, 1);
+	jmp	.__reverse_lock_key_end
+  .0to1:
+  	movb	$1, caps_lock(, %eax, 1);
+  .__reverse_lock_key_end:
+	leave
+	ret
 	
 
 .section .data
-alt_l:		.byte	0
-alt_r:		.byte	0
-ctrl_l:		.byte	0
-ctrl_r:		.byte	0
-shift_l:	.byte	0
-shift_r:	.byte	0
 caps_lock:	.byte	0
 num_lock:	.byte	1
 scroll_lock:	.byte	0
