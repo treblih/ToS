@@ -320,34 +320,55 @@ exception_handler:
 
 	# print error code, if has
 	cmp	$0xffffffff, 12(%ebp)
-	je	.exception_handler_no_errcode
+	je	.no_errcode
+
 	pushl	$msg_errcode
 	call	puts
 	addl	$4, %esp
-	pushl	12(%ebp)
-	call	h2s
-	addl	$4, %esp
 
-  .exception_handler_no_errcode:
+	# i2s(char *str, int n, int div)
+	subl	$0x10, %esp	# buf of str, alignment
+	movl	%esp, %ebx
+	pushl	$0x10
+	pushl	12(%ebp)
+	pushl	%ebx
+	call	i2s
+	/* addl	$8, %esp	# not 12, remain the div */
+	pushl	%ebx
+	call	puts
+	addl	$4 + 8, %esp	# str str n, remain the div
+
+  .no_errcode:
 	# print eip / cs / eflags
 	pushl	$msg_eip
 	call	puts
 	addl	$4, %esp
-	pushl	16(%ebp)
-	call	h2s
-	addl	$4, %esp
+	pushl	16(%ebp)	# take advantage of remaining div
+	pushl	%ebx
+	call	i2s
+	pushl	%ebx
+	call	puts
+	addl	$4 + 8, %esp
+
 	pushl	$msg_cs
 	call	puts
 	addl	$4, %esp
 	pushl	20(%ebp)
-	call	h2s
-	addl	$4, %esp
+	pushl	%ebx
+	call	i2s
+	pushl	%ebx
+	call	puts
+	addl	$4 + 8, %esp
+
 	pushl	$msg_eflags
 	call	puts
 	addl	$4, %esp
 	pushl	24(%ebp)
-	call	h2s
-	addl	$4, %esp
+	pushl	%ebx
+	call	i2s
+	pushl	%ebx
+	call	puts
+	addl	$4 + 8 + 4 + 0x10, %esp	# div, buf of str
 
 	popl	%ebx
 	popl	%eax
@@ -389,5 +410,6 @@ msg_eip:	.asciz "\neip: "
 msg_cs:		.asciz "\ncs:"
 msg_eflags:	.asciz "\neflags:"
 
-.section .bss
-.lcomm __idtr,	6
+/* .section .bss */
+/* .lcomm __idtr,	6 */
+__idtr:	.fill 6

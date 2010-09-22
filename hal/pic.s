@@ -11,6 +11,7 @@
 	.type	__x86_pic_init, @function
 __x86_pic_init:
 	pushl	%eax
+	pushl	%edx
 
 	# ICW1, need ICW4/ cascading/ initializing
 	movb	$0x11, %al
@@ -39,6 +40,7 @@ __x86_pic_init:
 	outb	$REG_IMR
 	outb	$REG_IMR_S
 
+	popl	%edx
 	popl	%eax
 	ret
 
@@ -69,7 +71,7 @@ __interrupt_done:
 	ret
 
 #------------------------------------------------------------------ 
-# void __irq_enable(int vec, void *offset);
+# void __irq_enable(int vec, void *handler);
 #------------------------------------------------------------------ 
 	.type	__irq_enable, @function
 __irq_enable:
@@ -93,7 +95,7 @@ __irq_enable:
 	# IRQ 8-15 -- 0xa1 OCW1
   .__irq_enable_slave:
 	inb   	$REG_IMR_S
-	andb  	%dl, %al                               
+	andb  	%dl, %al 
 	outb   	$REG_IMR_S
   .__irq_enable_set_idt:
 	pushl	$slc_krnl_rx

@@ -104,8 +104,8 @@ cluster_sequence:
 	movw	$msg_key_to_jmp, %si
 	call	print
 	# int 0x16, func 0, await a input char
-	movb    $0, %ah
-	int     $0x16                             
+	/* movb    $0, %ah */
+	/* int     $0x16                              */
 	# shut down floppy LED
 	call	kill_flp_motor
 

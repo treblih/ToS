@@ -82,11 +82,10 @@ puts_base:
 	lodsb			
 	cmp	$'\n', %al
 	jne	.puts_putchar
-  	call	__asm_debug
-	movl	%edi,	%eax
+	movl	%edi, %eax
 	subl	$0xb8000, %eax
 	movl	$160, %edx	# 80 * 2
-	div	%dl		
+	div	%dl		# ax / dl = al + ah
 	shrw	$8, %ax		# ah holds the remainder
 	subw	%ax, %di	
 	addl	$160, %edi	# to the next new line

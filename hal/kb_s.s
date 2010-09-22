@@ -9,10 +9,6 @@
 
 	.type	__kb_init, @function
 __kb_init:
-	movl	$0, cnt
-	movl	$buf, head
-	movl	$buf, tail
-	movb	$1, num_lock
 	call 	led_init
 	# enable the IRQ
 	pushl	$kb_buf_write
@@ -119,18 +115,18 @@ kb_buf_write:
 	ret
 	
 
-.section .bss
-.lcomm alt_l,	 	1
-.lcomm alt_r,	 	1
-.lcomm ctrl_l,	 	1
-.lcomm ctrl_r,	 	1
-.lcomm shift_l,	 	1
-.lcomm shift_r,	 	1
-.lcomm caps_lock,	1
-.lcomm num_lock,	1
-.lcomm scroll_lock,	1
+.section .data
+alt_l:		.byte	0
+alt_r:		.byte	0
+ctrl_l:		.byte	0
+ctrl_r:		.byte	0
+shift_l:	.byte	0
+shift_r:	.byte	0
+caps_lock:	.byte	0
+num_lock:	.byte	1
+scroll_lock:	.byte	0
 
-.lcomm head,	 	4
-.lcomm tail,		4 
-.lcomm cnt, 		4
-.lcomm buf,		KB_BUF_LEN
+head:	.long	buf 
+tail:	.long 	buf
+cnt:	.long	0
+buf:	.fill	KB_BUF_LEN

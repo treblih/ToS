@@ -22,7 +22,7 @@
  * ===  FUNCTION  ======================================================================
  *         Name:  i2s
  *  Description:  convert an integer(dec/hex/oct/bin) to string
- *  		  return the string letters
+ *  		  return length of the string
  * =====================================================================================
  */
 int i2s(char *str, int n, int div)

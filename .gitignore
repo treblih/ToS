@@ -17,6 +17,7 @@ core*
 bochslog.txt
 
 a.s
+tmp.s
 .vimrc
 
 tags

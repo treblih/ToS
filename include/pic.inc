@@ -46,9 +46,9 @@
 .macro  irq_m   vec
 	/* OCW1, close itself, so can't be re-entered by itself */
 	xor	%eax, %eax
-        inb     $REG_IMR
-        orb     $1 << \vec, %al
-        outb    $REG_IMR
+        /* inb     $REG_IMR */
+        /* orb     $1 << \vec, %al */
+        /* outb    $REG_IMR */
 
 	/*-----------------------------------------------------------------------------
 	 * OCW2, clears corresponding bit in ISR
@@ -56,6 +56,10 @@
 	 * so set ICW4 == 0x01(manu), and clears ISR by ourself
 	 * only reset master
 	 *-----------------------------------------------------------------------------*/
+	pushl	$\vec
+	call	__get_irq_handler
+	addl	$4, %esp
+        call    *%eax
         movb    $OCW2_MASK_EOI, %al
         outb    $REG_COMMAND
 
@@ -65,26 +69,23 @@
 	 * but here we need int-reenter, so we "sti" - exe - "cli" manually
 	 * 
 	 * whole progress: 
-	 * int - cli - exe - (sti exe cli) - exe - sti - iret
+	 * int - cli - exe - (sti exe cli) - exe - sti - ret
 	 *
 	 * int re-enter from here
 	 *-----------------------------------------------------------------------------*/
-        sti
-	pushl	\vec
-	call	__get_irq_handler
-	addl	$4, %esp
-        call    *(%eax)
-        cli
+        /* sti */
+        /* cli */
 
 	/* OCW1, open again */
-        inb     $REG_IMR
-        andb    $~1 << \vec, %al
-        outb    $REG_IMR
-        ret
+        /* inb     $REG_IMR */
+        /* andb    $~1 << \vec, %al */
+        /* outb    $REG_IMR */
+        iret
 .endm
 
 .macro  irq_s  vec
 	/* OCW1, close itself, so can't be re-entered by itself */
+	xor	%eax, %eax
         inb     $REG_IMR_S
         orb     $1 << \vec, %al
         outb    $REG_IMR_S
@@ -107,20 +108,20 @@
 	 * but here we need int-reenter, so we "sti" - exe - "cli" manually
 	 * 
 	 * whole progress: 
-	 * int - cli - exe - (sti exe cli) - exe - sti - iret
+	 * int - cli - exe - (sti exe cli) - exe - sti - ret
 	 *
 	 * int re-enter from here
 	 *-----------------------------------------------------------------------------*/
-        sti
-	pushl	\vec + 8
+        /* sti */
+	pushl	$\vec + 8
 	call	__get_irq_handler
 	addl	$4, %esp
-        call    *(%eax)
-        cli
+        call    *%eax
+        /* cli */
 
 	/* OCW1, open again */
         inb     $REG_IMR_S
         andb    $~1 << \vec, %al
         outb    $REG_IMR_S
-        ret
+        iret
 .endm

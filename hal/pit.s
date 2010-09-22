@@ -14,7 +14,6 @@
 	.type	__pit_init, @function
 __pit_init:
 	pushl	%eax
-
 	# set ratio
 	# 0x2e9b == 11931 == 1193182 / 100
 	mov	$RATE_GENERATOR, %eax
@@ -26,7 +25,7 @@ __pit_init:
 
 	# enable the IRQ
 	pushl	$pit_handler
-	pushl	$IRQ_TIMER
+	pushl	$0
 	call	__irq_enable
 	addl	$8, %esp
 
@@ -35,18 +34,13 @@ __pit_init:
 
 	.type	__get_pit_cnt, @function
 __get_pit_cnt:
-	movl	pit_cnt, %eax
+	movl	jiffies, %eax
 	ret
 
 	.type	pit_handler, @function
 pit_handler:
-	cli
-	addl	$1, pit_cnt
-	pushl	$0		# no.0
-	call	__interrupt_done
-	addl	$4, %esp
-	sti
+	addl	$1, jiffies
 	ret
 
-.section .bss
-.lcomm pit_cnt, 4
+.section .data
+jiffies: .long 0
