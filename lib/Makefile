@@ -6,4 +6,4 @@ OBJS	:=	lib_s.o lib_c.o puts.o printf.o kmalloc.o bitvec.o
 
 all	:	$(OBJS)
 clean	:
-	-rm *.o
+	-rm *.o -f

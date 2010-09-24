@@ -170,10 +170,10 @@ void __kb_buf_decode()
 	int column = 0;
 	int make;
 
-	/*
+	/*-----------------------------------------------------------------------------
 	 * if there is anything in buf, we do next.
 	 * so the read_keyboard_buf() below need no judge count, diff with write_tty()
-	 */
+	 *-----------------------------------------------------------------------------*/
 	if (__get_kb_buf_cnt()) {		
 		scan_code = __kb_buf_read();
 		if (scan_code == 0xe0) {
@@ -214,7 +214,7 @@ void __kb_buf_decode()
 				keyval = PAUSEBREAK;
 			}
 		}
-		/* there's no else */
+		/* no else */
 
 		if ((keyval != PAUSEBREAK) && (keyval != PRINTSCREEN)) {
 			/* make is for ctrl/break code judge */

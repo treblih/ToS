@@ -5,4 +5,4 @@ OBJS	:=	kernel.o page.o
 
 all	:$(OBJS)
 clean	:
-	-rm *.o
+	-rm -f *.o

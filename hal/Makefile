@@ -6,4 +6,4 @@ OBJS	:=	gdt.o idt.o pic.o hal.o cpu.o pmem.o pit.o kb_s.o kb_c.o
 
 all	:$(OBJS)
 clean	:
-	-rm *.o
+	-rm *.o -f

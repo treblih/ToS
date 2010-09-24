@@ -31,6 +31,11 @@
 #define		PG_RW		0x2
 #define		PG_USR		0x4
 
+/* PAGE_SHIFT determines the page size */
+#define PAGE_SHIFT	13
+#define PAGE_SIZE	(1 << PAGE_SHIFT)
+#define PAGE_MASK	(~(PAGE_SIZE - 1))
+
 
 /*-----------------------------------------------------------------------------
  *  4 bytes
