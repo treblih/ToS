@@ -8,7 +8,7 @@ __hal_init:
 	call	puts
 	addl	$4, %esp
 	
-	call	__x86_cpu_init
+	call	__cpu_init
 	call	__pit_init
 	call	__kb_init
 	ret

@@ -39,7 +39,7 @@ __x86_idt_init:
 
 	# set idt
 	movl	$0, %eax		# vector starts from 0
-	pushl	$slc_krnl_rx
+	pushl	$__KERNEL_CS
 	pushl	$IDT_IGATE | DPL0
 	pushl	$__divide_error
 	pushl	%eax

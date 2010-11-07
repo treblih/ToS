@@ -1,8 +1,8 @@
-.include "pmode.inc"
 .include "mem.inc"
+#include <desc.h>
 
-.section .text
 .code16
+.section .text
 
 .equ	bpb_RootEntries, 224
 .equ	mem_root, 0x7e00 # 0x7c00 + 0x200
@@ -343,8 +343,8 @@ prepare_pmode:
 	movl	%eax, %cr0
 
 	# long jump, 0x66
-	/* ljmpl	$slc_krnl_rx, $KRNL_RM_BASE + 0x100 */
-	ljmpl	$slc_krnl_rx, $pm_start
+	/* ljmpl	$__KERNEL_CS, $KRNL_RM_BASE + 0x100 */
+	ljmpl	$__KERNEL_CS, $pm_start
 
 
 .section .text

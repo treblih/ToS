@@ -3,13 +3,13 @@
 
 .section .text
 
-.globl	__x86_pic_init
+.globl	__pic_init
 .globl	__interrupt_done
 .globl	__irq_enable
 .globl	__get_irq_handler
 
-	.type	__x86_pic_init, @function
-__x86_pic_init:
+	.type	__pic_init, @function
+__pic_init:
 	pushl	%eax
 	pushl	%edx
 
@@ -98,14 +98,14 @@ __irq_enable:
 	andb  	%dl, %al 
 	outb   	$REG_IMR_S
   .__irq_enable_set_idt:
-	pushl	$slc_krnl_rx
+	pushl	$__KERNEL_CS
 	pushl	$IDT_IGATE | DPL0
 	movl	irq_in_idt(, %ecx, 4), %eax
 	pushl	%eax
 	movl	%ecx, %edx
 	addl	$0x20, %edx	# irq starts from 0x20
 	pushl	%edx
-	call	__idt_set
+	/* call	__idt_set */
 	addl	$16, %esp
 
 	# set in irq_handler_table

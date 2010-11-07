@@ -4,8 +4,7 @@ LDSCRIPT:=	-Tlink.ld
 MAKE	:= 	make
 export
 
-#DIRS	:=	boot/ kernel/ hal/ lib/
-DIRS	:=	boot_diy/ kernel/ hal/ lib/
+DIRS	:=	boot/ kernel/ hal/ lib/
 KRNL	:=	kernel.elf
 IMG	:=	a.img
 FLOPPY	:=	/media/floppy
@@ -23,7 +22,7 @@ cascading:
 
 # after cascading, *.o appear in respective dir
 # kernel.o must be the 1st to link into kernel.elf
-$(KRNL)	:	OBJS = $(wildcard  kernel/*.o lib/*.o hal/*.o)
+$(KRNL)	:	OBJS = $(wildcard kernel/*.o lib/*.o hal/*.o)
 #$(KRNL)	:	OBJS = $(wildcard  kernel/*.o lib/*.o hal/*.o)
 $(KRNL)	:
 	#$(LD) $(LDFLAGS) 0x100100 $(OBJS) -o $(@)
@@ -39,11 +38,11 @@ install	:
 	@sudo mount -o loop $(IMG) $(FLOPPY)
 	#@sudo cp boot/ $(FLOPPY) -rfv
 	@sudo cp boot/loader.bin $(FLOPPY) -fv 
-	@sudo cp $(KRNL) $(FLOPPY)/kernel -fv 
+	@sudo cp $(KRNL) $(FLOPPY) -fv 
 	#@sudo cp initrd.img $(FLOPPY) -fv
 	@sudo umount $(FLOPPY) 
 
 clean	:	MAKE += clean
 clean	:
 	$(foreach dir, $(DIRS), $(MAKE) -C $(dir);)
-	-rm $(KRNL) -f
+	-rm $(KRNL) $(IMG) -f

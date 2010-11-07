@@ -3,7 +3,7 @@ SECTIONS
 {
     .text 0x100100 :
     {
-        code = .; _code = .; __code = .;
+        text = .; _text = .; __text = .;
         *(.text)
     }
 
